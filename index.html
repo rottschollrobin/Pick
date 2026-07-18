@@ -140,25 +140,27 @@
   .jumpform{display:flex; gap:6px; flex:1; min-width:180px;}
   .jumpform input{flex:1; border:1.5px solid var(--line); border-radius:var(--radius-sm); padding:8px 10px; font-size:0.85rem;}
 
-  .item{position:relative; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:14px; display:flex; gap:12px; overflow:hidden; box-shadow:var(--shadow);}
+  .item{position:relative; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:14px; display:flex; gap:14px; align-items:flex-start; box-shadow:var(--shadow);}
   .item.done{opacity:0.72;}
-  .item-lf-wrap{display:flex; flex-direction:column; align-items:center; gap:6px; min-width:64px;}
-  .item-cover{width:56px; max-height:80px; object-fit:contain; border-radius:5px; border:1px solid var(--line); background:#fff;}
+  .item-cover{width:84px; height:112px; object-fit:contain; border-radius:6px; border:1px solid var(--line); background:#fff; flex-shrink:0;}
   .item-lf{font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:1.15rem; color:#fff; background:var(--zc,var(--brand)); border-radius:8px; padding:8px 6px; min-width:64px; text-align:center; letter-spacing:0.02em;}
+  .item-lf-inline{display:inline-block; font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:1.02rem; color:#fff; background:var(--zc,var(--brand)); border-radius:7px; padding:5px 10px; letter-spacing:0.02em; margin-bottom:8px;}
   .item-main{flex:1; min-width:0;}
   .item-title{font-size:0.95rem; font-weight:600; line-height:1.35; word-break:break-word;}
   .item-meta{margin-top:6px; font-size:0.78rem; color:var(--ink-soft); display:flex; flex-wrap:wrap; gap:4px 10px;}
   .qty-badge{display:inline-block; background:var(--brand); color:#fff; font-family:'IBM Plex Mono',monospace; font-size:0.72rem; font-weight:600; border-radius:5px; padding:1px 6px; margin-left:6px;}
-  .item-actions{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
-  .pin-btn, .nf-btn, .undo-btn{border:1.5px solid var(--line); background:transparent; border-radius:7px; padding:7px 10px; font-size:0.76rem; font-weight:600; color:var(--ink-soft);}
+  .item-actions-col{display:flex; flex-direction:column; gap:8px; min-width:110px; flex-shrink:0;}
+  .item-actions-col .btn-sm{width:100%;}
+  .pin-btn{border:1.5px solid var(--line); background:transparent; border-radius:7px; padding:6px 10px; font-size:0.74rem; font-weight:600; color:var(--ink-soft); margin-top:8px;}
+  .nf-btn, .undo-btn{border:1.5px solid var(--line); background:transparent; border-radius:7px; padding:9px 10px; font-size:0.78rem; font-weight:600; color:var(--ink-soft); width:100%;}
   .nf-btn{border-color:var(--danger); color:var(--danger);}
   .undo-btn{border-color:var(--ink-faint);}
   .marker-row{margin-top:8px; display:flex; flex-wrap:wrap; gap:5px;}
   .marker{font-size:0.7rem; background:#FFF3D6; border:1px solid #E9CE83; color:#6B5416; border-radius:20px; padding:2px 8px;}
 
-  .stamp{position:absolute; top:10px; right:10px; transform:rotate(-8deg); border:2.5px solid var(--success); color:var(--success); border-radius:8px; font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:0.05em; font-weight:700; font-size:0.72rem; padding:4px 8px; background:var(--success-bg); opacity:0.95; animation:stampin .22s ease-out;}
+  .stamp{align-self:center; text-align:center; border:2px solid var(--success); color:var(--success); border-radius:8px; font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:0.05em; font-weight:700; font-size:0.68rem; padding:4px 8px; background:var(--success-bg); animation:stampin .22s ease-out;}
   .stamp.nf{border-color:var(--danger); color:var(--danger); background:var(--danger-bg);}
-  @keyframes stampin{from{transform:rotate(-8deg) scale(1.5); opacity:0;} to{transform:rotate(-8deg) scale(1); opacity:0.95;}}
+  @keyframes stampin{from{transform:scale(1.4); opacity:0;} to{transform:scale(1); opacity:1;}}
   @media (prefers-reduced-motion: reduce){.stamp{animation:none;}}
 
   .empty-state{text-align:center; padding:40px 16px; color:var(--ink-soft);}
@@ -245,32 +247,56 @@ function zoneOf(lagerfachRaw){
 }
 
 /* ============ Cover images ============ */
-/* Best-effort, inoffiziell: erst Open Library (ISBN/EAN), dann Amazon-Bild-URL-Konvention (ASIN). */
+/* Best-effort, inoffiziell, keine Garantie: mehrere kostenlose Quellen ohne API-Key werden
+   der Reihe nach versucht. Pro Quelle max. 5 Sekunden Wartezeit, danach automatisch weiter
+   zur nächsten - so bleibt nichts hängen. Bilder werden nur vorübergehend angezeigt, nicht
+   gespeichert oder kopiert. */
+const COVER_TIMEOUT_MS = 3000;
+
 function coverCandidates(code){
   if (!code) return [];
   const raw = code.trim();
   const candidates = [];
   const isbnClean = raw.replace(/[^0-9Xx]/g, '');
-  if (/^(\d{9}[\dXx]|\d{10}|\d{13})$/.test(isbnClean)){
+  const isIsbn = /^(\d{9}[\dXx]|\d{10}|\d{13})$/.test(isbnClean);
+  if (isIsbn){
     candidates.push('https://covers.openlibrary.org/b/isbn/' + isbnClean + '-S.jpg?default=false');
+    candidates.push('https://books.google.com/books/content?vid=ISBN' + isbnClean + '&printsec=frontcover&img=1&zoom=1');
   }
   const asinClean = raw.replace(/[^0-9A-Za-z]/g, '');
   if (/^[0-9A-Za-z]{10}$/.test(asinClean)){
     candidates.push('https://images-na.ssl-images-amazon.com/images/P/' + asinClean + '.01.LZZZZZZZ.jpg');
+    candidates.push('https://m.media-amazon.com/images/P/' + asinClean + '.01.LZZZZZZZ.jpg');
   }
   return candidates;
 }
-function handleCoverError(img){
+
+function armCoverTimeout(img){
+  if (img._coverTimer) clearTimeout(img._coverTimer);
+  img._coverTimer = setTimeout(() => { tryNextCover(img); }, COVER_TIMEOUT_MS);
+}
+function tryNextCover(img){
   let remaining = [];
   try{ remaining = JSON.parse(img.dataset.coverCandidates || '[]'); }catch(e){ remaining = []; }
   if (remaining.length){
     const next = remaining.shift();
     img.dataset.coverCandidates = JSON.stringify(remaining);
     img.src = next;
+    armCoverTimeout(img);
   } else {
+    if (img._coverTimer) clearTimeout(img._coverTimer);
     img.remove();
   }
 }
+function handleCoverError(img){ tryNextCover(img); }
+function handleCoverLoad(img){ if (img._coverTimer) clearTimeout(img._coverTimer); }
+function initCoverTimeouts(){
+  document.querySelectorAll('.item-cover').forEach(img => {
+    if (img.complete && img.naturalWidth > 0) return;
+    armCoverTimeout(img);
+  });
+}
+
 
 
 
@@ -747,26 +773,25 @@ function renderItemCard(zone, item, def){
   }
   const covers = coverCandidates(item.code);
   const coverHtml = covers.length
-    ? `<img class="item-cover" src="${esc(covers[0])}" data-cover-candidates="${esc(JSON.stringify(covers.slice(1)))}" alt="" loading="lazy" onerror="handleCoverError(this)">`
+    ? `<img class="item-cover" src="${esc(covers[0])}" data-cover-candidates="${esc(JSON.stringify(covers.slice(1)))}" alt="" onerror="handleCoverError(this)" onload="handleCoverLoad(this)">`
     : '';
+  const actionsHtml = !(st && st.picked) ? `
+      <button class="btn btn-primary btn-sm" data-action="pick" data-zone="${zone}" data-id="${esc(item.id)}">✓ Gepickt</button>
+      <button class="nf-btn" data-action="notfound" data-zone="${zone}" data-id="${esc(item.id)}">Nicht gefunden</button>
+    ` : `<button class="undo-btn" data-action="undo" data-zone="${zone}" data-id="${esc(item.id)}">Rückgängig</button>`;
   return `
   <div class="item ${st && st.picked ? 'done' : ''}" id="item-${esc(item.id)}" style="--zc:${def.color}">
-    ${stamp}
-    <div class="item-lf-wrap">
-      <div class="item-lf">${esc(item.lagerfach)}</div>
-      ${coverHtml}
-    </div>
+    ${coverHtml}
     <div class="item-main">
+      <div class="item-lf-inline">${esc(item.lagerfach)}</div>
       <div class="item-title">${esc(item.titel)}${item.menge>1 ? `<span class="qty-badge">×${item.menge}</span>`:''}</div>
       <div class="item-meta"><span>Bestellnr. ${esc(item.bestellnummer)}</span></div>
       ${markers.length ? `<div class="marker-row">${markers.map(([n]) => `<span class="marker">📍 ${esc(n)}</span>`).join('')}</div>` : ''}
-      <div class="item-actions">
-        ${!(st && st.picked) ? `
-          <button class="btn btn-primary btn-sm" data-action="pick" data-zone="${zone}" data-id="${esc(item.id)}">✓ Gepickt</button>
-          <button class="nf-btn" data-action="notfound" data-zone="${zone}" data-id="${esc(item.id)}">Nicht gefunden</button>
-          <button class="pin-btn" data-action="markhere" data-zone="${zone}" data-id="${esc(item.id)}">📍 Hier starten</button>
-        ` : `<button class="undo-btn" data-action="undo" data-zone="${zone}" data-id="${esc(item.id)}">Rückgängig</button>`}
-      </div>
+      ${!(st && st.picked) ? `<button class="pin-btn" data-action="markhere" data-zone="${zone}" data-id="${esc(item.id)}">📍 Hier starten</button>` : ''}
+    </div>
+    <div class="item-actions-col">
+      ${stamp}
+      ${actionsHtml}
     </div>
   </div>`;
 }
@@ -844,6 +869,7 @@ function renderOverview(){
 function bindDynamicHandlers(){
   const onlyOpenToggle = document.getElementById('onlyopen-toggle');
   if (onlyOpenToggle) onlyOpenToggle.addEventListener('change', (e) => { state.onlyOpen = e.target.checked; render(); });
+  initCoverTimeouts();
 }
 
 document.getElementById('app').addEventListener('click', async (e) => {
