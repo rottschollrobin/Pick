@@ -1,0 +1,2260 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Pickliste</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="googlebot" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F2EEEC;
+    --surface:#FFFFFF;
+    --surface-2:#F7F3F2;
+    --ink:#231A1B;
+    --ink-soft:#6B5B5C;
+    --ink-faint:#9A8B8C;
+    --line:#E3D6D5;
+    --brand:#B3122A;
+    --brand-dark:#7E0D1E;
+    --brand-ink:#FFFFFF;
+    --success:#2E7D46;
+    --success-bg:#E4F2E8;
+    --danger:#B4790E;
+    --danger-bg:#FBF0DC;
+    --info:#2B5F8A;
+    --info-bg:#E6EEF4;
+    --zone-kniedrig:#B3122A;
+    --zone-kniedrig-bg:#F7E4E7;
+    --zone-khoch:#7A1220;
+    --zone-khoch-bg:#F1E1E2;
+    --zone-m:#D1495B;
+    --zone-m-bg:#FBE7EA;
+    --radius:12px;
+    --radius-sm:8px;
+    --shadow:0 1px 2px rgba(35,26,27,0.06), 0 4px 14px rgba(35,26,27,0.06);
+  }
+  *{box-sizing:border-box;}
+  html{touch-action:manipulation;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  .display{font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:0.04em;}
+  button{font-family:inherit; cursor:pointer;}
+  input, textarea{font-family:inherit;}
+  a{color:inherit;}
+  :focus-visible{outline:3px solid #4F8FD1; outline-offset:2px;}
+
+  #app{max-width:720px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column;}
+
+  /* ---- Top bar ---- */
+  .topbar{position:sticky; top:0; z-index:20; background:var(--brand); color:var(--brand-ink); padding:14px 16px; min-height:64px; box-sizing:border-box;}
+  .topbar-row{display:flex; align-items:center; gap:10px; min-height:42px;}
+  .topbar-title{font-family:'Oswald',sans-serif; font-weight:600; letter-spacing:0.03em; font-size:1.05rem; text-transform:uppercase;}
+  .topbar-sub{font-size:0.78rem; opacity:0.85; margin-top:2px;}
+  .topbar-right{display:flex; gap:6px; align-items:center;}
+  .iconbtn{
+    background:rgba(255,255,255,0.14); border:1px solid rgba(255,255,255,0.3); color:#fff;
+    border-radius:var(--radius-sm); padding:8px 12px; font-size:0.85rem; font-weight:600;
+    display:flex; align-items:center; gap:6px; white-space:nowrap;
+  }
+  .iconbtn:active{background:rgba(255,255,255,0.24);}
+  .progress-track{height:8px; border-radius:6px; background:rgba(255,255,255,0.22); margin-top:12px; overflow:hidden;}
+  .progress-fill{height:100%; background:#fff; border-radius:6px; transition:width .3s ease;}
+  .linklike{background:none; border:none; color:inherit; text-decoration:underline; font:inherit; padding:0; cursor:pointer;}
+
+  .logo-chip{
+    background:#fff; border-radius:10px; width:42px; height:42px; min-width:42px;
+    display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.2);
+  }
+  .logo-chip img{width:100%; height:100%; object-fit:contain;}
+  .hero-logo{width:120px; height:auto; display:block; margin:6px auto 18px; border-radius:14px; box-shadow:var(--shadow);}
+
+  /* ---- Generic layout ---- */
+  .content{padding:16px; flex:1; padding-bottom:48px;}
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow);}
+  .stack{display:flex; flex-direction:column; gap:12px;}
+  .muted{color:var(--ink-soft);}
+  .faint{color:var(--ink-faint);}
+  h1,h2,h3{margin:0;}
+  .section-title{font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:0.05em; font-size:0.85rem; color:var(--ink-soft); margin:22px 0 10px;}
+  .section-title:first-child{margin-top:0;}
+  .center{text-align:center;}
+
+  .btn{border:none; border-radius:var(--radius-sm); padding:13px 18px; font-weight:600; font-size:0.95rem; display:inline-flex; align-items:center; justify-content:center; gap:8px;}
+  .btn-primary{background:var(--brand); color:#fff;}
+  .btn-primary:active{background:var(--brand-dark);}
+  .btn-outline{background:transparent; border:1.5px solid var(--line); color:var(--ink);}
+  .btn-outline:active{background:var(--surface-2);}
+  .btn-block{width:100%;}
+  .btn-sm{padding:8px 12px; font-size:0.82rem; border-radius:7px;}
+  .btn:disabled{opacity:0.45;}
+
+  /* ---- Hauptmenü ---- */
+  .menu-greeting{font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:0.03em; font-weight:600; font-size:1.1rem; color:var(--ink); text-align:center; margin:4px 0 18px;}
+  .menu-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:12px;}
+  .menu-tile{aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:9px; background:var(--surface); border:1px solid var(--line); border-radius:18px; box-shadow:var(--shadow); padding:8px; text-align:center;}
+  .menu-tile:active{background:var(--surface-2); transform:scale(0.97);}
+  .menu-icon-badge{width:82%; aspect-ratio:1; max-width:92px; border-radius:22%; background:linear-gradient(160deg, var(--zone-kniedrig-bg), #F0D4D8); box-shadow:inset 0 1px 0 rgba(255,255,255,0.5); display:flex; align-items:center; justify-content:center; color:var(--brand);}
+  .menu-icon{width:62%; height:62%;}
+  .menu-icon svg{width:100%; height:100%; display:block;}
+  .menu-label{font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:0.04em; font-weight:600; font-size:0.7rem; color:var(--ink);}
+  .menu-tile-disabled{opacity:0.5;}
+  .menu-tile-disabled .menu-icon-badge{background:var(--surface-2); color:var(--ink-faint); box-shadow:none;}
+  .menu-tile-empty{background:transparent; border:1.5px dashed var(--line); box-shadow:none;}
+
+  /* ---- User select ---- */
+  .user-row-card{display:flex; align-items:stretch; width:100%; border:1px solid var(--line); border-left:6px solid var(--brand); border-radius:var(--radius); background:var(--surface); box-shadow:var(--shadow); overflow:hidden;}
+  .settings-bubble{display:flex; align-items:center; gap:14px; width:100%; text-align:left; border:1px solid var(--line); border-left:6px solid var(--brand); border-radius:var(--radius); background:var(--surface); padding:18px; box-shadow:var(--shadow);}
+  .settings-bubble:active{background:var(--surface-2);}
+  .settings-bubble-icon{font-size:1.6rem; line-height:1;}
+  .settings-bubble-label{font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:0.03em; font-weight:600; font-size:0.95rem; color:var(--ink);}
+  .settings-bubble-danger{border-left-color:var(--danger);}
+  .user-avatar-clickable{display:flex; align-items:center; justify-content:center; padding:16px; cursor:pointer;}
+  .user-avatar-img{width:44px; height:44px; border-radius:50%; object-fit:cover; display:block;}
+  .user-choose-btn{flex:1; display:flex; align-items:center; text-align:left; padding:20px 20px 20px 2px; border:none; background:transparent;}
+  .user-choose-btn:active{background:var(--surface-2);}
+  .user-avatar{width:44px; height:44px; border-radius:50%; background:var(--zone-kniedrig-bg); color:var(--brand); display:flex; align-items:center; justify-content:center; font-family:'Oswald',sans-serif; font-weight:700;}
+  .user-name{font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:0.03em; font-weight:600; font-size:1.1rem;}
+  .user-row{display:flex; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-sm); padding:10px 12px;}
+  .user-row .user-name{flex:1; font-size:0.95rem;}
+  .remove-x{background:none; border:1.5px solid var(--danger); color:var(--danger); border-radius:6px; width:28px; height:28px; font-weight:700;}
+  .addform{display:flex; gap:8px;}
+  .addform input{flex:1; border:1.5px solid var(--line); border-radius:var(--radius-sm); padding:10px 12px; font-size:0.9rem;}
+
+  /* ---- Settings ---- */
+  .field-label{font-size:0.8rem; font-weight:600; color:var(--ink-soft); margin-bottom:6px; display:block;}
+  .url-field{width:100%; border:1.5px solid var(--line); border-radius:var(--radius-sm); padding:11px; font-size:0.85rem; font-family:'IBM Plex Mono',monospace;}
+  .status-line{display:flex; align-items:center; gap:8px; font-size:0.82rem; padding:9px 12px; border-radius:8px;}
+  .status-ok{background:var(--success-bg); color:var(--success);}
+  .status-error{background:var(--danger-bg); color:var(--danger);}
+  .status-checking{background:var(--info-bg); color:var(--info);}
+
+  /* ---- Upload box (fallback) ---- */
+
+  .notice{background:#FFF6E0; border:1px solid #E9CE83; color:#6B5416; border-radius:var(--radius-sm); padding:10px 12px; font-size:0.82rem; line-height:1.45;}
+
+  /* ---- Update banner ---- */
+  .update-banner{display:flex; align-items:center; justify-content:space-between; gap:10px; background:var(--info-bg); border:1px solid #B9CEE0; color:var(--info); border-radius:var(--radius); padding:12px 14px; font-size:0.85rem; font-weight:600;}
+
+  /* ---- Lobby / zones ---- */
+  .zone-block{border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; border:1px solid var(--line);}
+  .zone-tile{position:relative; display:block; width:100%; text-align:left; padding:16px; background:var(--surface); border:none; border-left:6px solid var(--zc, var(--brand)); cursor:pointer;}
+  .zone-tile-dim{opacity:0.5; filter:grayscale(0.7);}
+  .zone-done-badge{position:absolute; top:12px; right:12px; background:var(--success); color:#fff; font-family:'Oswald',sans-serif; text-transform:uppercase; font-weight:700; font-size:0.72rem; padding:4px 10px; border-radius:20px; letter-spacing:0.03em;}
+  .zone-tile:active{background:var(--surface-2);}
+  .zone-head{display:flex; justify-content:space-between; align-items:baseline;}
+  .zone-name{font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:0.03em; font-weight:600; font-size:1.02rem;}
+  .zone-count{font-family:'IBM Plex Mono',monospace; font-size:0.95rem; color:var(--ink-soft);}
+  .zone-progress-track{height:6px; background:var(--surface-2); border-radius:5px; margin-top:10px; overflow:hidden;}
+  .zone-progress-fill{height:100%; border-radius:5px; background:var(--zc,var(--brand));}
+  .zone-boxes{margin-top:8px; font-size:0.78rem; color:var(--ink-soft); font-weight:600;}
+  .zone-presence{margin-top:9px; font-size:0.78rem; color:var(--ink-soft); display:flex; flex-wrap:wrap; gap:6px;}
+  .report-bubble-list{display:flex; flex-direction:column;}
+  .report-bubble{display:flex; gap:12px; align-items:flex-start; background:var(--surface); border:none; border-top:1px solid var(--line); padding:12px;}
+  .report-bubble-nf{border-left:4px solid var(--danger);}
+  .report-bubble-damage{border-left:4px solid #C97A2E;}
+  .report-main{flex:1; min-width:0;}
+  .report-title{font-size:0.88rem; font-weight:600; line-height:1.3; word-break:break-word;}
+  .report-reason{margin-top:3px; font-size:0.78rem; font-weight:700; color:var(--danger);}
+  .report-meta{margin-top:5px; font-size:0.72rem; color:var(--ink-soft);}
+  .pill{background:var(--surface-2); border:1px solid var(--line); border-radius:20px; padding:3px 9px; font-size:0.74rem;}
+
+  /* ---- Picking screen ---- */
+  .picking-tools{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;}
+  .toggle{display:flex; align-items:center; gap:7px; background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:7px 12px; font-size:0.8rem; font-weight:600; color:var(--ink-soft);}
+  .toggle input{width:16px; height:16px;}
+  .jumpform{display:flex; gap:6px; flex:1; min-width:180px;}
+  .jumpform input{flex:1; border:1.5px solid var(--line); border-radius:var(--radius-sm); padding:8px 10px; font-size:0.85rem;}
+
+  .item{position:relative; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:14px; display:flex; gap:14px; align-items:flex-start; box-shadow:var(--shadow);}
+  .item.done{opacity:0.72;}
+  .pack-blocked{filter:grayscale(0.85); opacity:0.65; cursor:pointer;}
+  .pack-block-badge{position:absolute; top:-9px; left:50%; transform:translateX(-50%); background:var(--danger); color:#fff; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.8rem; box-shadow:var(--shadow); z-index:2;}
+  .pack-actions{display:flex; flex-direction:column; gap:8px; min-width:140px;}
+  .pack-actions-row{display:flex; gap:8px;}
+  .pack-method-btn{flex:1; aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; border:1.5px solid var(--line); border-radius:var(--radius-sm); background:var(--surface); font-family:'Oswald',sans-serif; font-weight:600; font-size:0.72rem; text-transform:uppercase; color:var(--ink);}
+  .pack-method-btn:active{background:var(--surface-2); border-color:var(--brand);}
+  .pack-method-icon{font-size:1.5rem; line-height:1;}
+  .pack-problem-btn{width:100%; border:1.5px solid var(--danger); color:var(--danger); background:transparent; border-radius:var(--radius-sm); padding:9px; font-size:0.76rem; font-weight:600;}
+  .pack-problem-btn-active{background:var(--danger); color:#fff;}
+  .pack-problem-badge{position:absolute; top:-9px; left:50%; transform:translateX(-50%); background:var(--danger); color:#fff; font-family:'Oswald',sans-serif; text-transform:uppercase; font-weight:700; font-size:0.66rem; padding:3px 10px; border-radius:20px; box-shadow:var(--shadow); z-index:2; white-space:nowrap;}
+  .pack-address{min-width:145px; max-width:170px; font-size:0.75rem; line-height:1.45; color:var(--ink); border-left:1px dashed var(--line); padding-left:10px; flex-shrink:0;}
+  .pack-address-name{font-weight:700; margin-bottom:2px;}
+  .pack-related-hint{margin-top:8px; background:var(--info-bg); border:1px solid #B9CEE0; border-radius:var(--radius-sm); padding:8px 10px;}
+  .pack-related-title{font-size:0.76rem; font-weight:600; color:var(--info);}
+  .pack-related-list{margin-top:5px; display:flex; flex-wrap:wrap; gap:5px;}
+  .pack-related-badge{font-family:'IBM Plex Mono',monospace; font-size:0.72rem; font-weight:600; background:var(--surface); border:1px solid #B9CEE0; color:var(--info); border-radius:5px; padding:2px 7px;}
+  .pack-related-badge-open{background:var(--danger-bg); border-color:var(--danger); color:var(--danger);}
+  .item-cover{width:84px; height:112px; object-fit:contain; border-radius:6px; border:1px solid var(--line); background:#fff; flex-shrink:0;}
+  .item-cover-none, .item-cover-loading{width:84px; height:112px; border-radius:6px; border:1px solid var(--line); background:var(--surface-2); display:flex; align-items:center; justify-content:center; text-align:center; font-size:0.62rem; color:var(--ink-faint); line-height:1.3; flex-shrink:0; padding:4px;}
+  .item-cover-loading{background:linear-gradient(90deg, var(--surface-2) 25%, #EFE8E7 37%, var(--surface-2) 63%); background-size:400% 100%; animation:coverPulse 1.4s ease-in-out infinite;}
+  @keyframes coverPulse{0%{background-position:100% 50%;} 100%{background-position:0 50%;}}
+  @media (prefers-reduced-motion: reduce){.item-cover-loading{animation:none;}}
+  .item-lf{font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:1.15rem; color:#fff; background:var(--zc,var(--brand)); border-radius:8px; padding:8px 6px; min-width:64px; text-align:center; letter-spacing:0.02em;}
+  .item-lf-inline{display:inline-block; font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:1.02rem; color:#fff; background:var(--zc,var(--brand)); border-radius:7px; padding:5px 10px; letter-spacing:0.02em; margin-bottom:8px;}
+  .item-main{flex:1; min-width:0;}
+  .item-title{font-size:0.95rem; font-weight:600; line-height:1.35; word-break:break-word;}
+  .item-meta{margin-top:6px; font-size:0.78rem; color:var(--ink-soft); display:flex; flex-wrap:wrap; gap:4px 10px;}
+  .qty-badge{display:inline-block; background:var(--brand); color:#fff; font-family:'IBM Plex Mono',monospace; font-size:0.72rem; font-weight:600; border-radius:5px; padding:1px 6px; margin-left:6px;}
+  .item-actions-col{display:flex; flex-direction:column; gap:8px; min-width:130px; flex-shrink:0;}
+  .icon-row{display:flex; gap:6px; align-items:stretch;}
+  .icon-sq-btn{width:36px; min-width:36px; border:1.5px solid var(--line); background:transparent; border-radius:7px; font-size:0.95rem; display:flex; align-items:center; justify-content:center;}
+  .icon-sq-btn-active{background:var(--danger-bg); border-color:var(--danger);}
+  .damage-marker{margin-top:4px; font-size:0.76rem; color:var(--danger); font-weight:600;}
+  .item-cover-clickable{display:block; cursor:pointer;}
+  .item-actions-col .btn-sm{width:100%;}
+  .pin-btn-stacked{border:1.5px solid var(--line); background:transparent; border-radius:7px; padding:9px 10px; font-size:0.74rem; font-weight:600; color:var(--ink-soft); width:100%;}
+  .item-subtitle{margin-top:3px; font-size:0.78rem; color:var(--ink-soft); font-style:italic; line-height:1.3;}
+  .nf-btn, .undo-btn{border:1.5px solid var(--line); background:transparent; border-radius:7px; padding:9px 10px; font-size:0.78rem; font-weight:600; color:var(--ink-soft); width:100%;}
+  .nf-btn{border-color:var(--danger); color:var(--danger);}
+  .undo-btn{border-color:var(--ink-faint);}
+  .marker-row{margin-top:8px; display:flex; flex-wrap:wrap; gap:5px;}
+  .marker{font-size:0.7rem; background:#FFF3D6; border:1px solid #E9CE83; color:#6B5416; border-radius:20px; padding:2px 8px;}
+
+  .stamp{align-self:stretch; width:100%; box-sizing:border-box; text-align:center; border:2px solid var(--success); color:var(--success); border-radius:8px; font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:0.05em; font-weight:700; font-size:0.68rem; padding:4px 8px; background:var(--success-bg); animation:stampin .22s ease-out;}
+  .stamp.nf{border-color:var(--danger); color:var(--danger); background:var(--danger-bg);}
+  @keyframes stampin{from{transform:scale(1.4); opacity:0;} to{transform:scale(1); opacity:1;}}
+  @media (prefers-reduced-motion: reduce){.stamp{animation:none;}}
+
+  .empty-state{text-align:center; padding:40px 16px; color:var(--ink-soft);}
+  .empty-state .big{font-size:2rem; margin-bottom:8px;}
+
+
+  .footernote{text-align:center; color:var(--ink-faint); font-size:0.72rem; margin-top:26px;}
+  .badge-count{background:rgba(255,255,255,0.2); border-radius:20px; padding:2px 9px; font-size:0.75rem; font-weight:700;}
+  .nf-list-item{border-left:4px solid var(--danger); background:var(--danger-bg);}
+  .topbar-banner{display:flex; align-items:center; gap:9px; background:rgba(255,255,255,0.94); color:var(--ink); border-radius:6px; padding:6px 10px; margin-top:10px; overflow:hidden;}
+  .topbar-banner .lp-label{flex-shrink:0; text-transform:uppercase; font-size:0.6rem; letter-spacing:0.06em; font-family:'Oswald',sans-serif; font-weight:700; color:var(--ink-soft);}
+  .topbar-banner .lp-lagerfach{flex-shrink:0; font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:0.76rem; color:var(--brand);}
+  .topbar-banner .lp-title{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:0.76rem;}
+
+  /* ---- Schmale Hochformat-Bildschirme (Smartphone): Aktionen unter statt neben den Text ---- */
+  @media (max-width: 480px){
+    .item{flex-wrap:wrap;}
+    .item-actions-col{flex:1 1 100%; min-width:0; order:10;}
+  }
+
+  /* ---- Trennlinie "Hier starten" (Punkt 5) ---- */
+  .start-divider{display:flex; align-items:center; gap:8px; margin:6px 0; color:var(--ink-soft); font-size:0.74rem; font-weight:600;}
+  .start-divider::before, .start-divider::after{content:''; flex:1; height:1px; background:var(--line);}
+
+  /* ---- Bereichsaufteilung (Punkt 2) ---- */
+  .claim-row{display:flex; justify-content:space-between; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-sm); padding:10px 12px; font-size:0.85rem;}
+  .stepper-row{display:flex; align-items:center; justify-content:center; gap:20px; padding:16px; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);}
+  .stepper-row-brand{background:var(--brand); border-color:var(--brand-dark);}
+  .stepper-value-brand{color:#fff;}
+  .stepper-btn-brand{background:rgba(255,255,255,0.18); border-color:rgba(255,255,255,0.4); color:#fff;}
+  .stepper-btn{width:48px; height:48px; border-radius:50%; border:1.5px solid var(--line); background:var(--surface-2); font-size:1.4rem; font-weight:700; color:var(--ink);}
+  .stepper-value{text-align:center; font-family:'Oswald',sans-serif; font-weight:600; font-size:1.1rem; min-width:110px;}
+
+  /* ---- Modal-Overlay ---- */
+  .modal-overlay{position:fixed; inset:0; background:rgba(35,26,27,0.55); display:flex; align-items:center; justify-content:center; z-index:100; padding:20px;}
+  .modal-box{background:var(--surface); border-radius:var(--radius); padding:20px; max-width:400px; width:100%; box-shadow:var(--shadow); max-height:85vh; overflow-y:auto;}
+  .modal-actions{display:flex; gap:10px; justify-content:flex-end; margin-top:14px;}
+  .modal-photo-row{display:flex; justify-content:space-between; align-items:center; margin-top:14px;}
+  .evidence-preview{width:100%; max-height:200px; object-fit:contain; border-radius:var(--radius-sm); border:1px solid var(--line); margin-top:12px; background:var(--surface-2);}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ============ Branding ============ */
+const LOGO_DATA_URI = "data:image/jpeg;base64,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";
+const DEFAULT_USERS = ['Robin', 'Jenni', 'Udo'];
+const APP_VERSION = '1.20';
+const DEFAULT_SOURCE_URL = 'https://pub-ee1c804dd31b41c7a3e9d7799f07336e.r2.dev/Pickliste.txt';
+const DEFAULT_ADDRESS_URL = 'https://pub-ee1c804dd31b41c7a3e9d7799f07336e.r2.dev/ADRRechnungVersand.txt';
+
+/* ============ Login (Supabase Auth) ============ */
+/* Echter Login statt Zugangscode - die Absicherung passiert direkt in Supabase über
+   Row-Level-Security (nur mit gültigem Login gibt es überhaupt Daten zurück), nicht nur
+   im Browser. Der Benutzername wird intern automatisch in eine Login-E-Mail umgewandelt,
+   sichtbar ist das für niemanden. Sitzung bleibt bestehen, bis der Browser komplett
+   geschlossen wird (sessionStorage statt localStorage). */
+const LOGIN_EMAIL_SUFFIX = '@intern.local';
+const SESSION_STORAGE_KEY = 'pickliste-session';
+const SESSION_REFRESH_INTERVAL_MS = 45 * 60 * 1000;
+
+function usernameToEmail(username){
+  return (username || '').trim().toLowerCase()
+    .replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss')
+    .replace(/\s+/g, '') + LOGIN_EMAIL_SUFFIX;
+}
+function saveSession(session){
+  try{ sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session)); }catch(e){}
+}
+function loadSession(){
+  try{ const raw = sessionStorage.getItem(SESSION_STORAGE_KEY); return raw ? JSON.parse(raw) : null; }catch(e){ return null; }
+}
+function clearSession(){
+  try{ sessionStorage.removeItem(SESSION_STORAGE_KEY); }catch(e){}
+}
+
+/* ============ Supabase-Konfiguration ============ */
+/* Project Settings -> API im Supabase-Dashboard. Der anon-Key ist bewusst öffentlich im
+   Code sichtbar - Supabase sichert den Zugriff nicht über Geheimhaltung dieses Schlüssels,
+   sondern über die Row-Level-Security-Regeln, die per SQL eingerichtet werden. */
+const SUPABASE_URL = 'https://uegkegjgawwwkzpsopry.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_kYWdCHLV2X5OSG_KM-J72g_zy7EhgSL';
+
+/* ============ Storage helpers (Supabase statt window.storage) ============ */
+function authToken(){
+  return (state.session && state.session.access_token) || SUPABASE_ANON_KEY;
+}
+async function storageGet(key){
+  try{
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/kv_store?key=eq.${encodeURIComponent(key)}&select=value`,
+      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + authToken() } }
+    );
+    if (!res.ok) return null;
+    const rows = await res.json();
+    return rows.length ? rows[0].value : null;
+  }catch(e){ return null; }
+}
+async function storageSet(key, value){
+  try{
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/kv_store?on_conflict=key`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + authToken(),
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates',
+      },
+      body: JSON.stringify([{ key, value, updated_at: new Date().toISOString() }]),
+    });
+    return res.ok;
+  }catch(e){ console.error('storage set failed', key, e); return false; }
+}
+
+async function loginWithPassword(username, password){
+  try{
+    const email = usernameToEmail(username);
+    const res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data.access_token) return null;
+    return { access_token: data.access_token, refresh_token: data.refresh_token };
+  }catch(e){ return null; }
+}
+
+async function refreshSession(){
+  if (!state.session || !state.session.refresh_token) return false;
+  try{
+    const res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=refresh_token', {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: state.session.refresh_token }),
+    });
+    if (!res.ok) return false;
+    const data = await res.json();
+    if (!data.access_token) return false;
+    state.session = { access_token: data.access_token, refresh_token: data.refresh_token || state.session.refresh_token };
+    saveSession(state.session);
+    return true;
+  }catch(e){ return false; }
+}
+
+/* ============ Zones ============ */
+const ZONE_DEFS = {
+  Kniedrig: {label:'Bereich 1', range:'K00001 – K11999', color:'var(--zone-kniedrig)'},
+  Khoch:    {label:'Bereich 2', range:'K12000 – K20000', color:'var(--zone-khoch)'},
+  M:        {label:'Bereich 3', range:'Medien (M...)',    color:'var(--zone-m)'},
+};
+const ZONE_ORDER = ['Kniedrig','Khoch','M'];
+const ITEMS_PER_BOX = 15;
+
+function sortNum(lagerfach){
+  const m = /^([A-Za-z]+)(\d+)/.exec(lagerfach || '');
+  return m ? parseInt(m[2], 10) : 0;
+}
+function zoneOf(lagerfachRaw){
+  const lf = (lagerfachRaw || '').trim().toUpperCase();
+  if (lf.startsWith('M')) return 'M';
+  if (lf.startsWith('K')) return sortNum(lf) <= 11999 ? 'Kniedrig' : 'Khoch';
+  return 'Sonstige';
+}
+
+/* ============ Cover images ============ */
+/* Reihenfolge: zuerst ISBNdb (eigener API-Key, beste Trefferquote), danach als Fallback
+   mehrere kostenlose Quellen ohne API-Key (Open Library, Google Books, 2x Amazon). Jedes
+   Bild wird pro Artikel nur EINMAL abgefragt und danach im Speicher zwischengespeichert -
+   auch über mehrere Bildschirm-Aktualisierungen/Status-Abfragen hinweg (kein endloses
+   Neuladen mehr). Wird kein Bild gefunden, erscheint ein fester, rein lokaler Platzhalter
+   ohne weitere Netzwerkzugriffe. Bilder werden nur vorübergehend angezeigt, nicht
+   gespeichert oder kopiert. */
+const COVER_TIMEOUT_MS = 3000;
+const ISBNDB_API_KEY = '70566_d40ff93ebed4ac72b8ea0c9e40daa494';
+const DISCOGS_TOKEN = 'fxOyVaOiHttcLcSnfiDgogmNRKmHLkXjlpTgOrWG';
+const OMDB_API_KEY = 'dbef3750';
+const TMDB_API_KEY = '238fce8c152fe1ee4b3dda900d9fdc88';
+const coverCache = {};    // code -> Bild-URL oder 'NONE'
+const coverPromises = {}; // code -> laufendes Promise, verhindert doppelte Abfragen
+
+function isIsbnCode(code){
+  const clean = (code || '').replace(/[^0-9Xx]/g, '');
+  return /^(\d{9}[\dXx]|\d{10}|\d{13})$/.test(clean);
+}
+function isBarcodeCode(code){
+  const clean = (code || '').replace(/[^0-9]/g, '');
+  return /^\d{8,13}$/.test(clean);
+}
+function cleanIsbn(code){ return (code || '').replace(/[^0-9Xx]/g, ''); }
+function cleanAsin(code){ return (code || '').replace(/[^0-9A-Za-z]/g, ''); }
+function cleanBarcode(code){ return (code || '').replace(/[^0-9]/g, ''); }
+
+function fallbackCandidates(code){
+  const candidates = [];
+  if (isIsbnCode(code)){
+    const isbn = cleanIsbn(code);
+    candidates.push('https://covers.openlibrary.org/b/isbn/' + isbn + '-S.jpg?default=false');
+    candidates.push('https://books.google.com/books/content?vid=ISBN' + isbn + '&printsec=frontcover&img=1&zoom=1');
+  }
+  const asin = cleanAsin(code);
+  if (/^[0-9A-Za-z]{10}$/.test(asin)){
+    candidates.push('https://images-na.ssl-images-amazon.com/images/P/' + asin + '.01.LZZZZZZZ.jpg');
+    candidates.push('https://m.media-amazon.com/images/P/' + asin + '.01.LZZZZZZZ.jpg');
+  }
+  return candidates;
+}
+
+function testImageLoads(url){
+  return new Promise((resolve) => {
+    const img = new Image();
+    let done = false;
+    const timer = setTimeout(() => { if (!done){ done = true; resolve(null); } }, COVER_TIMEOUT_MS);
+    img.onload = () => {
+      if (done) return; done = true; clearTimeout(timer);
+      const tooSmall = img.naturalWidth < 40 || img.naturalHeight < 40;
+      // Google Books liefert für unbekannte ISBNs mehrere leicht unterschiedliche Platzhalter-
+      // Größen zurück (bisher beobachtet: 128x170, 128x184) - immer mit Breite 128 und Höhe
+      // in einem ähnlichen Bereich, daher ein Bereich statt nur ein exakter Wert.
+      const isGoogleBooksPlaceholder = img.naturalWidth === 128 && img.naturalHeight >= 150 && img.naturalHeight <= 200;
+      // Amazon liefert für unbekannte/ungültige ASINs immer denselben 320x256-Platzhalter zurück.
+      const isAmazonPlaceholder = img.naturalWidth === 320 && img.naturalHeight === 256;
+      resolve((tooSmall || isGoogleBooksPlaceholder || isAmazonPlaceholder) ? null : url);
+    };
+    img.onerror = () => { if (done) return; done = true; clearTimeout(timer); resolve(null); };
+    img.src = url;
+  });
+}
+
+async function fetchIsbndbImage(isbn){
+  try{
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), COVER_TIMEOUT_MS);
+    const res = await fetch('https://api2.isbndb.com/book/' + isbn, {
+      headers: { 'Authorization': ISBNDB_API_KEY },
+      signal: controller.signal,
+    });
+    clearTimeout(t);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return (data && data.book && data.book.image) ? data.book.image : null;
+  }catch(e){ return null; }
+}
+
+async function fetchDiscogsImage(barcode){
+  try{
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), COVER_TIMEOUT_MS);
+    const url = 'https://api.discogs.com/database/search?barcode=' + encodeURIComponent(barcode) + '&type=release&token=' + DISCOGS_TOKEN;
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(t);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const first = data && data.results && data.results[0];
+    const img = first ? (first.cover_image || first.thumb) : null;
+    return img || null;
+  }catch(e){ return null; }
+}
+
+/* Plausibilitäts-Check für die titelbasierte OMDb-Suche: verhindert, dass ein zufälliger,
+   inhaltlich falscher Treffer als Cover übernommen wird. Häufige Füllwörter (Artikel etc.)
+   werden ignoriert, da sie sonst fast jeden Titel künstlich ähnlich erscheinen lassen. */
+const TITLE_STOPWORDS = new Set(['der','die','das','und','von','im','in','mit','ein','eine','the','and','of','a','an','to','for']);
+function normalizeTitleWords(title){
+  return (title || '')
+    .toLowerCase()
+    .replace(/ä/g,'a').replace(/ö/g,'o').replace(/ü/g,'u').replace(/ß/g,'ss')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length > 0 && !TITLE_STOPWORDS.has(w));
+}
+function titleMatchesWellEnough(query, candidate){
+  const wq = normalizeTitleWords(query);
+  const wc = normalizeTitleWords(candidate);
+  if (!wq.length || !wc.length) return false;
+  const setQ = new Set(wq), setC = new Set(wc);
+  let overlap = 0;
+  setQ.forEach(w => { if (setC.has(w)) overlap++; });
+  const recall = overlap / setQ.size;
+  const precision = overlap / setC.size;
+  return recall >= 0.5 && precision >= 0.4;
+}
+/* Verkaufstitel enthalten oft Zusatzinfos (Auflage, Disc-Anzahl, Episoden-Nummer), die eine
+   Filmdatenbank nicht kennt. Vor der Suche wird daher auf den "nackten" Titel reduziert. */
+function simplifyMediaTitle(title){
+  let t = (title || '');
+  t = t.replace(/\([^)]*\)/g, ' ');
+  t = t.split(/\s+-\s+/)[0];
+  t = t.replace(/\s+(vol\.?|volume|episode|folge|teil|disc|cd)\s*\d+.*$/i, '');
+  t = t.replace(/\s+/g, ' ').trim();
+  return t;
+}
+
+async function fetchTmdbImage(title){
+  const query = simplifyMediaTitle(title);
+  if (!query) return null;
+  try{
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), COVER_TIMEOUT_MS);
+    const res = await fetch('https://api.themoviedb.org/3/search/multi?api_key=' + TMDB_API_KEY + '&query=' + encodeURIComponent(query) + '&language=de-DE', { signal: controller.signal });
+    clearTimeout(t);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const first = data && data.results && data.results[0];
+    if (!first || !first.poster_path) return null;
+    const foundTitle = first.title || first.name || '';
+    if (!titleMatchesWellEnough(query, foundTitle)) return null;
+    return 'https://image.tmdb.org/t/p/w300' + first.poster_path;
+  }catch(e){ return null; }
+}
+
+async function fetchOmdbImage(title){
+  const query = simplifyMediaTitle(title);
+  if (!query) return null;
+  try{
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), COVER_TIMEOUT_MS);
+    const res = await fetch('https://www.omdbapi.com/?apikey=' + OMDB_API_KEY + '&t=' + encodeURIComponent(query), { signal: controller.signal });
+    clearTimeout(t);
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data.Response !== 'True') return null;
+    if (!data.Poster || data.Poster === 'N/A') return null;
+    if (!titleMatchesWellEnough(query, data.Title)) return null;
+    return data.Poster;
+  }catch(e){ return null; }
+}
+
+async function resolveCover(code, title){
+  if (!code) return 'NONE';
+  if (coverCache[code] !== undefined) return coverCache[code];
+  if (coverPromises[code]) return coverPromises[code];
+  coverPromises[code] = (async () => {
+    let found = null;
+    if (isIsbnCode(code)){
+      const isbnImg = await fetchIsbndbImage(cleanIsbn(code));
+      if (isbnImg) found = await testImageLoads(isbnImg);
+    }
+    if (!found && isBarcodeCode(code)){
+      const discogsImg = await fetchDiscogsImage(cleanBarcode(code));
+      if (discogsImg) found = await testImageLoads(discogsImg);
+    }
+    if (!found && title){
+      const tmdbImg = await fetchTmdbImage(title);
+      if (tmdbImg) found = await testImageLoads(tmdbImg);
+    }
+    if (!found && title){
+      const omdbImg = await fetchOmdbImage(title);
+      if (omdbImg) found = await testImageLoads(omdbImg);
+    }
+    if (!found){
+      for (const url of fallbackCandidates(code)){
+        found = await testImageLoads(url);
+        if (found) break;
+      }
+    }
+    coverCache[code] = found || 'NONE';
+    delete coverPromises[code];
+    return coverCache[code];
+  })();
+  return coverPromises[code];
+}
+
+function coverSlotHtml(zone, item, customPhoto){
+  const coverId = 'cover-' + item.id;
+  const photoInputId = 'photoinput-' + item.id;
+  let inner;
+  if (customPhoto){
+    inner = `<img class="item-cover" id="${coverId}" src="${esc(customPhoto)}" alt="">`;
+  } else if (!item.code){
+    inner = `<div class="item-cover item-cover-none" id="${coverId}">📷<br>Foto</div>`;
+  } else {
+    const cached = coverCache[item.code];
+    if (cached === 'NONE') inner = `<div class="item-cover item-cover-none" id="${coverId}">Kein Bild<br>verfügbar</div>`;
+    else if (cached) inner = `<img class="item-cover" id="${coverId}" src="${esc(cached)}" alt="">`;
+    else inner = `<div class="item-cover item-cover-loading" id="${coverId}" data-code="${esc(item.code)}" data-title="${esc(item.titel)}"></div>`;
+  }
+  return `<label class="item-cover-clickable" for="${photoInputId}">${inner}</label><input type="file" id="${photoInputId}" accept="image/*" capture="environment" style="display:none;" data-zone="${zone}" data-id="${esc(item.id)}" data-photo-kind="cover">`;
+}
+
+function initCoverResolution(){
+  document.querySelectorAll('.item-cover-loading').forEach(el => {
+    const code = el.dataset.code;
+    const title = el.dataset.title;
+    if (!code) return;
+    resolveCover(code, title).then(result => {
+      if (!document.body.contains(el)) return;
+      if (result === 'NONE'){
+        el.outerHTML = `<div class="item-cover item-cover-none" id="${el.id}">Kein Bild<br>verfügbar</div>`;
+      } else {
+        el.outerHTML = `<img class="item-cover" id="${el.id}" src="${esc(result)}" alt="">`;
+      }
+    });
+  });
+}/* ============ Change detection ============ */
+function simpleHash(str){
+  let h = 0;
+  for (let i = 0; i < str.length; i++){ h = (h * 31 + str.charCodeAt(i)) | 0; }
+  return h + '_' + str.length;
+}
+
+/* ============ Parsing ============ */
+/* Spalten: A Bestellnummer, B Titel(lang, mit Autor), C Menge, D Lagerfach,
+   E Rech-Nr, F Kunde, G ISBN/EAN/ASIN, H Titel(kurz), I Autor */
+/* ============ Adressdaten (Rechnungsversand-Datei, verknüpft über Rech-Nr) ============ */
+function parseAddressFile(text){
+  const lines = text.split(/\r\n|\n|\r/).filter(l => l.trim().length > 0);
+  if (lines.length === 0) return {};
+  let start = 0;
+  if (/^Buechersendung/i.test(lines[0])) start = 1;
+  const lookup = {};
+  for (let i = start; i < lines.length; i++){
+    const cols = lines[i].split('\t');
+    if (cols.length < 12) continue;
+    const nameD = (cols[3] || '').trim();
+    const nameE = (cols[4] || '').trim();
+    const zuhaenden = (cols[5] || '').trim();
+    const strasse = (cols[6] || '').trim();
+    const plz = (cols[7] || '').replace(/^"|"$/g, '').trim();
+    const ort = (cols[8] || '').trim();
+    const gewicht = (cols[10] || '').trim();
+    const rechNr = (cols[11] || '').trim();
+    if (!rechNr) continue;
+    lookup[rechNr] = {
+      name: [nameD, nameE].filter(Boolean).join(' '),
+      zuhaenden,
+      strasse,
+      plzOrt: [plz, ort].filter(Boolean).join(' '),
+      gewicht,
+    };
+  }
+  return lookup;
+}
+
+async function fetchAndStoreAddressData(){
+  const url = state.addressSourceUrl;
+  if (!url) return;
+  try{
+    const sep = url.includes('?') ? '&' : '?';
+    const res = await fetch(url + sep + 'cb=' + Date.now());
+    if (!res.ok) return;
+    const buf = await res.arrayBuffer();
+    let text;
+    try{ text = new TextDecoder('windows-1252').decode(buf); }
+    catch(e){ text = new TextDecoder('utf-8').decode(buf); }
+    const lookup = parseAddressFile(text);
+    await storageSet('address-lookup', lookup);
+    state.addressLookup = lookup;
+    render();
+  }catch(e){ console.error('Adressdaten konnten nicht geladen werden', e); }
+}
+
+function parsePickliste(text){
+  const lines = text.split(/\r\n|\n|\r/).filter(l => l.trim().length > 0);
+  if (lines.length === 0) return [];
+  let start = 0;
+  if (/^Bestellnummer/i.test(lines[0])) start = 1;
+  const items = [];
+  for (let i = start; i < lines.length; i++){
+    const cols = lines[i].split('\t');
+    if (cols.length < 7) continue;
+    const bestellnummer = (cols[0] || '').trim();
+    const titelB = (cols[1] || '').trim();
+    const menge = parseInt((cols[2] || '1').trim(), 10) || 1;
+    const lagerfach = (cols[3] || '').trim();
+    const rechNr = (cols[4] || '').trim();
+    const code = (cols[6] || '').replace(/^ISBN:\s*/i, '').trim();
+    const titelH = (cols[7] || '').trim();
+    const titel = titelH || titelB;
+    if (!lagerfach) continue;
+    items.push({id: bestellnummer + '_' + i, bestellnummer, titel, titelLang: titelB, menge, lagerfach, rechNr, code, zone: zoneOf(lagerfach)});
+  }
+  return items;
+}
+
+/* ============ State ============ */
+let state = {
+  screen: 'login',
+  session: null,
+  previousScreen: null,
+  loginError: false,
+  pickerName: '',
+  currentZone: null,
+  users: [],
+  managingUsers: false,
+  meta: null,
+  items: {Kniedrig:[], Khoch:[], M:[], Sonstige:[]},
+  status: {Kniedrig:{}, Khoch:{}, M:{}, Sonstige:{}},
+  presence: {Kniedrig:{}, Khoch:{}, M:{}, Sonstige:{}},
+  assignment: {Kniedrig:{}, Khoch:{}, M:{}, Sonstige:{}},
+  pendingZone: null,
+  zoneBoxCount: 1,
+  modal: null,
+  expandedMarker: null,
+  damageReasons: [],
+  userAvatars: {},
+  pickFilter: 'open',
+  pollHandle: null,
+  busy: false,
+  sourceUrl: null,
+  addressSourceUrl: null,
+  addressLookup: {},
+  fetchStatus: 'idle',
+  fetchError: null,
+  pendingUpdate: null,
+};
+
+function esc(s){
+  return (s==null?'':String(s)).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function timeBasedGreeting(){
+  const hour = new Date().getHours();
+  if (hour < 11) return 'Guten Morgen';
+  if (hour < 18) return 'Guten Tag';
+  return 'Guten Abend';
+}
+
+function timeAgo(ts){
+  if(!ts) return '';
+  const s = Math.floor((Date.now()-ts)/1000);
+  if (s<60) return 'gerade eben';
+  if (s<3600) return 'vor ' + Math.floor(s/60) + ' Min';
+  return 'vor ' + Math.floor(s/3600) + ' Std';
+}
+function initials(name){
+  return (name||'').trim().split(/\s+/).map(p=>p[0]).join('').slice(0,3).toUpperCase();
+}
+
+/* ============ Users ============ */
+async function loadUsers(){
+  let users = await storageGet('users');
+  if (!users || !users.length){ users = DEFAULT_USERS.slice(); await storageSet('users', users); }
+  state.users = users;
+}
+async function addUserName(name){
+  name = (name || '').trim();
+  if (!name) return;
+  let users = (await storageGet('users')) || DEFAULT_USERS.slice();
+  if (!users.includes(name)) users.push(name);
+  await storageSet('users', users);
+  state.users = users;
+  render();
+}
+async function removeUserName(name){
+  if (!confirm('"' + name + '" aus der Nutzerliste entfernen?')) return;
+  let users = (await storageGet('users')) || DEFAULT_USERS.slice();
+  users = users.filter(u => u !== name);
+  await storageSet('users', users);
+  state.users = users;
+  let avatars = (await storageGet('user-avatars')) || {};
+  if (avatars[name]){ delete avatars[name]; await storageSet('user-avatars', avatars); state.userAvatars = avatars; }
+  render();
+}
+
+/* ============ Nutzerfotos (dauerhaft, unabhängig von der Pickliste) ============ */
+async function loadUserAvatars(){
+  state.userAvatars = (await storageGet('user-avatars')) || {};
+}
+async function setUserAvatar(username, dataUrl){
+  let avatars = (await storageGet('user-avatars')) || {};
+  avatars[username] = dataUrl;
+  await storageSet('user-avatars', avatars);
+  state.userAvatars = avatars;
+}
+
+/* ============ Schadensgründe (verwaltbare Liste, analog Nutzer) ============ */
+const DEFAULT_DAMAGE_REASONS = ['Wasserschaden', 'Beschädigt', 'Verdreckt'];
+async function loadDamageReasons(){
+  let reasons = await storageGet('damage-reasons');
+  if (!reasons || !reasons.length){ reasons = DEFAULT_DAMAGE_REASONS.slice(); await storageSet('damage-reasons', reasons); }
+  state.damageReasons = reasons;
+}
+async function addDamageReason(name){
+  name = (name || '').trim();
+  if (!name) return;
+  let reasons = (await storageGet('damage-reasons')) || DEFAULT_DAMAGE_REASONS.slice();
+  if (!reasons.includes(name)) reasons.push(name);
+  await storageSet('damage-reasons', reasons);
+  state.damageReasons = reasons;
+  render();
+}
+async function removeDamageReason(name){
+  if (!confirm('"' + name + '" aus der Liste entfernen?')) return;
+  let reasons = (await storageGet('damage-reasons')) || DEFAULT_DAMAGE_REASONS.slice();
+  reasons = reasons.filter(r => r !== name);
+  await storageSet('damage-reasons', reasons);
+  state.damageReasons = reasons;
+  render();
+}
+
+/* ============ Bereichsaufteilung (Punkt 2: Zuteilung an einzelne Picker) ============ */
+function itemsForZone(zone){ return state.items[zone] || []; }
+
+async function loadAssignment(zone){
+  return (await storageGet('assignment-'+zone)) || {};
+}
+async function saveAssignment(zone, assignment){
+  return await storageSet('assignment-'+zone, assignment);
+}
+function assignmentCounts(assignment){
+  const counts = {};
+  Object.values(assignment).forEach(a => { counts[a.by] = (counts[a.by] || 0) + 1; });
+  return counts;
+}
+async function claimBoxes(zone, picker, boxCount){
+  const items = itemsForZone(zone);
+  let assignment = await loadAssignment(zone);
+  const assignedIds = new Set(Object.keys(assignment));
+  const available = items.filter(it => !assignedIds.has(it.id));
+  const wanted = boxCount * ITEMS_PER_BOX;
+  const toClaim = available.slice(0, wanted);
+  const now = Date.now();
+  toClaim.forEach(it => { assignment[it.id] = {by: picker, at: now}; });
+  await saveAssignment(zone, assignment);
+  return assignment;
+}
+async function releaseAssignmentFor(zone, picker){
+  let assignment = await loadAssignment(zone);
+  Object.keys(assignment).forEach(id => { if (assignment[id].by === picker) delete assignment[id]; });
+  await saveAssignment(zone, assignment);
+  return assignment;
+}
+
+/* ============ Data loading ============ */
+async function loadAllZoneData(){
+  for (const z of ZONE_ORDER.concat(['Sonstige'])){
+    state.items[z] = (await storageGet('items-'+z)) || [];
+    state.status[z] = (await storageGet('status-'+z)) || {};
+    state.presence[z] = (await storageGet('presence-'+z)) || {};
+    state.assignment[z] = (await storageGet('assignment-'+z)) || {};
+  }
+}
+
+/* ============ Import ============ */
+async function importPicklist(text, filename){
+  const parsed = parsePickliste(text);
+  if (parsed.length === 0) return {ok:false, error:'no-items'};
+  const grouped = {Kniedrig:[], Khoch:[], M:[], Sonstige:[]};
+  for (const it of parsed){ (grouped[it.zone] || grouped.Sonstige).push(it); }
+  for (const z of Object.keys(grouped)) grouped[z].sort((a,b) => sortNum(a.lagerfach) - sortNum(b.lagerfach));
+  for (const z of ZONE_ORDER.concat(['Sonstige'])){
+    await storageSet('items-'+z, grouped[z] || []);
+    await storageSet('status-'+z, {});
+    await storageSet('presence-'+z, {});
+    await storageSet('assignment-'+z, {});
+  }
+  const sig = simpleHash(text);
+  const meta = {loadedAt: Date.now(), totalItems: parsed.length, filename: filename || 'unbekannt', sig};
+  await storageSet('meta', meta);
+  state.meta = meta;
+  state.items = grouped;
+  state.status = {Kniedrig:{}, Khoch:{}, M:{}, Sonstige:{}};
+  state.presence = {Kniedrig:{}, Khoch:{}, M:{}, Sonstige:{}};
+  state.assignment = {Kniedrig:{}, Khoch:{}, M:{}, Sonstige:{}};
+  state.pendingUpdate = null;
+  return {ok:true};
+}
+
+async function checkForUpdate(){
+  const url = state.sourceUrl || await storageGet('source-url');
+  state.sourceUrl = url;
+  if (!url) { render(); return; }
+  state.fetchStatus = 'checking';
+  render();
+  try{
+    const sep = url.includes('?') ? '&' : '?';
+    const res = await fetch(url + sep + 'cb=' + Date.now());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const buf = await res.arrayBuffer();
+    let text;
+    try{ text = new TextDecoder('windows-1252').decode(buf); }
+    catch(e){ text = new TextDecoder('utf-8').decode(buf); }
+    const sig = simpleHash(text);
+    state.fetchStatus = 'ok';
+    state.fetchError = null;
+    if (!state.meta){
+      await importPicklist(text, 'Automatisch geladen');
+    } else if (sig !== state.meta.sig){
+      state.pendingUpdate = {text, fetchedAt: Date.now()};
+    }
+  }catch(e){
+    state.fetchStatus = 'error';
+    state.fetchError = String((e && e.message) || e);
+  }
+  render();
+}
+
+async function applyPendingUpdate(){
+  if (!state.pendingUpdate) return;
+  if (!confirm('Neue Pickliste laden? Der bisherige Fortschritt geht dabei für alle Picker verloren.')) return;
+  await importPicklist(state.pendingUpdate.text, 'Automatisch geladen');
+  render();
+}
+
+async function saveSourceUrl(url){
+  url = (url || '').trim();
+  state.sourceUrl = url || null;
+  await storageSet('source-url', state.sourceUrl);
+  if (state.sourceUrl) await checkForUpdate();
+  else render();
+}
+
+async function forceReimportPicklist(){
+  if (!state.sourceUrl) return;
+  if (!confirm('Pickliste komplett neu laden und neu verarbeiten? Der bisherige Fortschritt (Gepickt/Verpackt/Meldungen) geht dabei für alle Picker verloren.')) return;
+  try{
+    const sep = state.sourceUrl.includes('?') ? '&' : '?';
+    const res = await fetch(state.sourceUrl + sep + 'cb=' + Date.now());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const buf = await res.arrayBuffer();
+    let text;
+    try{ text = new TextDecoder('windows-1252').decode(buf); }
+    catch(e){ text = new TextDecoder('utf-8').decode(buf); }
+    await importPicklist(text, 'Manuell neu geladen');
+    render();
+  }catch(e){ alert('Fehler beim Neuladen: ' + ((e && e.message) || e)); }
+}
+
+async function markAllItemsPicked(){
+  if (!state.meta){ alert('Es ist noch keine Pickliste geladen.'); return; }
+  const firstConfirm = confirm('Wirklich ALLE Artikel in ALLEN Bereichen als gepickt markieren? Das betrifft die komplette aktuelle Pickliste.');
+  if (!firstConfirm) return;
+  const secondConfirm = confirm('Bist du dir wirklich sicher? Dieser Schritt kann nicht automatisch rückgängig gemacht werden.');
+  if (!secondConfirm) return;
+  for (const z of ZONE_ORDER.concat(['Sonstige'])){
+    const items = state.items[z] || [];
+    if (!items.length) continue;
+    let remoteStatus = await storageGet('status-'+z) || {};
+    for (const it of items){
+      const existing = remoteStatus[it.id] || {};
+      if (!existing.picked){
+        remoteStatus[it.id] = { ...existing, picked: true, notFound: false, by: state.pickerName, at: Date.now() };
+      }
+    }
+    await storageSet('status-'+z, remoteStatus);
+    state.status[z] = remoteStatus;
+  }
+  render();
+  alert('Alle Artikel wurden als gepickt markiert.');
+}
+
+/* ============ Navigation / picking actions ============ */
+function chooseUser(name){
+  state.pickerName = name;
+  state.screen = 'menu';
+  render();
+}
+
+async function enterZone(zoneId){
+  if (!state.pickerName){ state.screen = 'user'; render(); return; }
+  const assignment = await loadAssignment(zoneId);
+  state.assignment[zoneId] = assignment;
+  const mine = Object.entries(assignment).filter(([,a]) => a.by === state.pickerName);
+  if (mine.length > 0){
+    state.currentZone = zoneId;
+    state.screen = 'picking';
+    render();
+    startPolling();
+  } else {
+    state.pendingZone = zoneId;
+    state.zoneBoxCount = 1;
+    state.screen = 'zone-entry';
+    render();
+  }
+}
+
+function leaveZone(){
+  stopPolling();
+  state.currentZone = null;
+  state.screen = 'lobby';
+  loadAllZoneData().then(render);
+}
+
+async function markItem(zone, item, notFound){
+  if (state.busy) return;
+  state.busy = true;
+  let remoteStatus = await storageGet('status-'+zone) || {};
+  const existing = remoteStatus[item.id] || {};
+  remoteStatus[item.id] = { ...existing, picked:true, notFound: !!notFound, by: state.pickerName, at: Date.now() };
+  const ok = await storageSet('status-'+zone, remoteStatus);
+  if (ok) state.status[zone] = remoteStatus;
+  let remotePresence = await storageGet('presence-'+zone) || {};
+  remotePresence[state.pickerName] = {lagerfach: item.lagerfach, itemId: item.id, at: Date.now()};
+  await storageSet('presence-'+zone, remotePresence);
+  state.presence[zone] = remotePresence;
+  state.busy = false;
+  render();
+}
+
+async function undoItem(zone, item){
+  if (state.busy) return;
+  state.busy = true;
+  let remoteStatus = await storageGet('status-'+zone) || {};
+  const existing = { ...(remoteStatus[item.id] || {}) };
+  delete existing.picked;
+  delete existing.notFound;
+  delete existing.by;
+  delete existing.at;
+  if (Object.keys(existing).length > 0) remoteStatus[item.id] = existing;
+  else delete remoteStatus[item.id];
+  const ok = await storageSet('status-'+zone, remoteStatus);
+  if (ok) state.status[zone] = remoteStatus;
+  state.busy = false;
+  render();
+}
+
+/* ============ Packen (bereichsübergreifend, in Lagerfach-Reihenfolge) ============ */
+async function packItem(zone, item, method){
+  if (state.busy) return;
+  state.busy = true;
+  let remoteStatus = await storageGet('status-'+zone) || {};
+  const existing = remoteStatus[item.id] || {};
+  remoteStatus[item.id] = { ...existing, packed: { by: state.pickerName, at: Date.now(), method } };
+  const ok = await storageSet('status-'+zone, remoteStatus);
+  if (ok) state.status[zone] = remoteStatus;
+  state.busy = false;
+  render();
+}
+
+async function markProblem(zone, item){
+  if (state.busy) return;
+  state.busy = true;
+  let remoteStatus = await storageGet('status-'+zone) || {};
+  const existing = remoteStatus[item.id] || {};
+  remoteStatus[item.id] = { ...existing, packProblem: { by: state.pickerName, at: Date.now() } };
+  const ok = await storageSet('status-'+zone, remoteStatus);
+  if (ok) state.status[zone] = remoteStatus;
+  state.busy = false;
+  render();
+}
+
+async function clearProblem(zone, item){
+  if (state.busy) return;
+  state.busy = true;
+  let remoteStatus = await storageGet('status-'+zone) || {};
+  const existing = { ...(remoteStatus[item.id] || {}) };
+  delete existing.packProblem;
+  remoteStatus[item.id] = existing;
+  const ok = await storageSet('status-'+zone, remoteStatus);
+  if (ok) state.status[zone] = remoteStatus;
+  state.busy = false;
+  render();
+}
+
+async function unpackItem(zone, item){
+  if (state.busy) return;
+  state.busy = true;
+  let remoteStatus = await storageGet('status-'+zone) || {};
+  const existing = { ...(remoteStatus[item.id] || {}) };
+  delete existing.packed;
+  remoteStatus[item.id] = existing;
+  const ok = await storageSet('status-'+zone, remoteStatus);
+  if (ok) state.status[zone] = remoteStatus;
+  state.busy = false;
+  render();
+}
+
+function packItemState(zone, item){
+  const status = state.status[zone] || {};
+  const s = status[item.id];
+  if (!s || !s.picked) return { blocked: true, reason: 'Noch nicht gepickt' };
+  if (s.notFound) return { blocked: true, reason: 'Als nicht gefunden gemeldet' };
+  if (s.damage) return { blocked: true, reason: 'Beschädigt: ' + s.damage.reason };
+  return { blocked: false, packed: !!s.packed };
+}
+
+function allPackItems(){
+  const combined = [];
+  for (const z of ZONE_ORDER.concat(['Sonstige'])){
+    const items = state.items[z] || [];
+    for (const it of items){
+      combined.push({ zone: z, item: it });
+    }
+  }
+  return combined;
+}
+
+function relatedOrderItems(zone, item){
+  if (!item.rechNr) return [];
+  return allPackItems()
+    .filter(({item: it}) => it.rechNr === item.rechNr && it.id !== item.id)
+    .map(({zone: z, item: it}) => {
+      const s = (state.status[z] || {})[it.id];
+      return { item: it, zone: z, packed: !!(s && s.packed), picked: !!(s && s.picked && !s.notFound) };
+    })
+    .filter(x => !x.packed)
+    .sort((a,b) => sortNum(a.item.lagerfach) - sortNum(b.item.lagerfach));
+}
+
+function startPackPolling(){
+  stopPolling();
+  state.pollHandle = setInterval(async () => {
+    if (state.screen !== 'packen' && state.screen !== 'gepackt') return;
+    for (const z of ZONE_ORDER.concat(['Sonstige'])){
+      state.status[z] = (await storageGet('status-'+z)) || state.status[z];
+    }
+    render();
+  }, 6000);
+}
+
+async function markHere(zone, item){
+  if (!state.pickerName) return;
+  let remotePresence = await storageGet('presence-'+zone) || {};
+  remotePresence[state.pickerName] = {lagerfach: item.lagerfach, itemId: item.id, at: Date.now()};
+  const ok = await storageSet('presence-'+zone, remotePresence);
+  if (ok) state.presence[zone] = remotePresence;
+  render();
+}
+
+/* ============ Titel bearbeiten, Schaden melden, eigenes Foto (Punkte 3, 4a, 4b) ============ */
+async function setTitleOverride(zone, itemId, newTitle){
+  let remoteStatus = await storageGet('status-'+zone) || {};
+  remoteStatus[itemId] = { ...(remoteStatus[itemId] || {}), titleOverride: (newTitle || '').trim() };
+  await storageSet('status-'+zone, remoteStatus);
+  state.status[zone] = remoteStatus;
+}
+
+async function setDamage(zone, itemId, reason){
+  let remoteStatus = await storageGet('status-'+zone) || {};
+  const existing = { ...(remoteStatus[itemId] || {}) };
+  if (reason){ existing.damage = {reason, by: state.pickerName, at: Date.now()}; }
+  else { delete existing.damage; }
+  remoteStatus[itemId] = existing;
+  await storageSet('status-'+zone, remoteStatus);
+  state.status[zone] = remoteStatus;
+}
+
+async function setCustomPhoto(zone, itemId, dataUrl){
+  let remoteStatus = await storageGet('status-'+zone) || {};
+  remoteStatus[itemId] = { ...(remoteStatus[itemId] || {}), photo: dataUrl };
+  await storageSet('status-'+zone, remoteStatus);
+  state.status[zone] = remoteStatus;
+}
+
+async function setEvidencePhoto(zone, itemId, dataUrl){
+  let remoteStatus = await storageGet('status-'+zone) || {};
+  remoteStatus[itemId] = { ...(remoteStatus[itemId] || {}), evidencePhoto: dataUrl };
+  await storageSet('status-'+zone, remoteStatus);
+  state.status[zone] = remoteStatus;
+}
+
+function compressImageFile(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxDim = 700;
+        let w = img.width, h = img.height;
+        if (w > maxDim || h > maxDim){
+          if (w > h){ h = Math.round(h * maxDim / w); w = maxDim; }
+          else { w = Math.round(w * maxDim / h); h = maxDim; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.6));
+      };
+      img.onerror = () => reject(new Error('image-decode-failed'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('file-read-failed'));
+    reader.readAsDataURL(file);
+  });
+}
+
+function jumpTo(zone, query){
+  const q = query.trim().toUpperCase();
+  if (!q) return;
+  const items = state.items[zone] || [];
+  let target = items.find(it => it.lagerfach.toUpperCase() === q);
+  if (!target){
+    const idx = parseInt(q, 10);
+    if (!isNaN(idx) && idx >= 1 && idx <= items.length) target = items[idx-1];
+  }
+  if (!target){
+    const partial = items.find(it => it.lagerfach.toUpperCase().includes(q));
+    if (partial) target = partial;
+  }
+  if (target){
+    const el = document.getElementById('item-'+target.id);
+    if (el) el.scrollIntoView({behavior: 'smooth', block: 'center'});
+  }
+}
+
+function startPolling(){
+  stopPolling();
+  state.pollHandle = setInterval(async () => {
+    if (state.screen !== 'picking' || !state.currentZone) return;
+    const z = state.currentZone;
+    const [status, presence] = await Promise.all([storageGet('status-'+z), storageGet('presence-'+z)]);
+    state.status[z] = status || {};
+    state.presence[z] = presence || {};
+    const jumpInput = document.getElementById('jump-input');
+    const preserved = jumpInput ? {
+      value: jumpInput.value,
+      focused: document.activeElement === jumpInput,
+      selStart: jumpInput.selectionStart,
+      selEnd: jumpInput.selectionEnd,
+    } : null;
+    render();
+    if (preserved){
+      const newInput = document.getElementById('jump-input');
+      if (newInput){
+        newInput.value = preserved.value;
+        if (preserved.focused){
+          newInput.focus();
+          try{ newInput.setSelectionRange(preserved.selStart, preserved.selEnd); }catch(e){}
+        }
+      }
+    }
+  }, 6000);
+}
+function stopPolling(){ if (state.pollHandle){ clearInterval(state.pollHandle); state.pollHandle = null; } }
+
+/* ============ Init ============ */
+async function afterLogin(){
+  await loadUsers();
+  await loadDamageReasons();
+  await loadUserAvatars();
+  state.sourceUrl = (await storageGet('source-url')) || DEFAULT_SOURCE_URL;
+  const meta = await storageGet('meta');
+  if (meta){ state.meta = meta; await loadAllZoneData(); }
+  state.addressSourceUrl = (await storageGet('address-source-url')) || DEFAULT_ADDRESS_URL;
+  state.addressLookup = (await storageGet('address-lookup')) || {};
+  fetchAndStoreAddressData();
+  setInterval(fetchAndStoreAddressData, 3 * 60 * 1000);
+  startAutoFetch();
+  setInterval(refreshSession, SESSION_REFRESH_INTERVAL_MS);
+}
+
+async function init(){
+  const existing = loadSession();
+  if (existing){
+    state.session = existing;
+    state.screen = 'user';
+    render();
+    await afterLogin();
+    render();
+  } else {
+    state.screen = 'login';
+    render();
+  }
+}
+
+function startAutoFetch(){
+  checkForUpdate();
+  setInterval(checkForUpdate, 3 * 60 * 1000);
+}
+
+async function submitLogin(username, password){
+  const session = await loginWithPassword(username, password);
+  if (session){
+    state.session = session;
+    state.loginError = false;
+    saveSession(session);
+    state.screen = 'user';
+    render();
+    await afterLogin();
+    render();
+  } else {
+    state.loginError = true;
+    render();
+  }
+}
+
+function logout(){
+  clearSession();
+  state.session = null;
+  state.screen = 'login';
+  state.pickerName = '';
+  state.currentZone = null;
+  render();
+}
+
+/* ============ Shared UI pieces ============ */
+function logoChip(){ return `<div class="logo-chip"><img src="${LOGO_DATA_URI}" alt="Logo" /></div>`; }
+function topbarHtml({title, sub, rightHtml, progressPct, bg, extraHtml}){
+  return `
+  <div class="topbar" style="${bg ? 'background:'+bg+';' : ''}">
+    <div class="topbar-row">
+      ${logoChip()}
+      <div style="flex:1; min-width:0;">
+        <div class="topbar-title">${esc(title)}</div>
+        <div class="topbar-sub" style="${sub ? '' : 'visibility:hidden;'}">${sub || '\u00A0'}</div>
+      </div>
+      <div class="topbar-right">${rightHtml || ''}</div>
+    </div>
+    <div class="progress-track" style="${typeof progressPct === 'number' ? '' : 'visibility:hidden;'}"><div class="progress-fill" style="width:${typeof progressPct === 'number' ? progressPct : 0}%"></div></div>
+    ${extraHtml || ''}
+  </div>`;
+}
+function settingsBtn(){ return `<button class="iconbtn" data-action="go-settings" title="Einstellungen">⚙</button>`; }
+function menuBtn(){ return `<button class="iconbtn" data-action="go-menu" title="Hauptmenü">🏠</button>`; }
+
+/* ============ Render: screens ============ */
+let lastRenderedScreen = null;
+function render(){
+  const app = document.getElementById('app');
+  const screenChanged = state.screen !== lastRenderedScreen;
+  if (state.screen === 'login') app.innerHTML = renderLogin();
+  else if (state.screen === 'menu') app.innerHTML = renderMenu();
+  else if (state.screen === 'user') app.innerHTML = renderUserSelect();
+  else if (state.screen === 'settings-menu') app.innerHTML = renderSettingsMenu();
+  else if (state.screen === 'settings') app.innerHTML = renderSettings();
+  else if (state.screen === 'settings-picklist') app.innerHTML = renderSettingsPicklist();
+  else if (state.screen === 'settings-address') app.innerHTML = renderSettingsAddress();
+  else if (state.screen === 'lobby') app.innerHTML = renderLobby();
+  else if (state.screen === 'zone-entry') app.innerHTML = renderZoneEntry();
+  else if (state.screen === 'picking') app.innerHTML = renderPicking();
+  else if (state.screen === 'packen') app.innerHTML = renderPacken();
+  else if (state.screen === 'gepackt') app.innerHTML = renderGepackt();
+  else if (state.screen === 'overview') app.innerHTML = renderOverview();
+  if (state.modal) app.innerHTML += renderModal();
+  if (screenChanged) window.scrollTo(0, 0);
+  lastRenderedScreen = state.screen;
+  bindDynamicHandlers();
+}
+
+const MENU_ICONS = {
+  pick: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="7" width="38" height="34" rx="3"/><line x1="5" y1="24" x2="43" y2="24"/><rect x="9" y="11" width="10" height="9" rx="1" fill="currentColor" stroke="none" opacity="0.18"/><rect x="23" y="11" width="10" height="9" rx="1" fill="currentColor" stroke="none" opacity="0.18"/><rect x="9" y="28" width="10" height="9" rx="1" fill="currentColor" stroke="none" opacity="0.18"/><rect x="25" y="28" width="10" height="9" rx="1" fill="currentColor" stroke="none" opacity="0.18"/></svg>`,
+  ticket: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="12" width="38" height="24" rx="5"/><line x1="24" y1="12" x2="24" y2="36" stroke-dasharray="3 4"/></svg>`,
+  packen: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="16" width="32" height="24" rx="2"/><path d="M8 16l8-8h16l8 8"/><line x1="8" y1="24" x2="40" y2="24"/><line x1="24" y1="16" x2="24" y2="40"/></svg>`,
+  lager: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 20L24 8l18 12"/><rect x="9" y="20" width="30" height="20" rx="1"/><rect x="19" y="28" width="10" height="12"/></svg>`,
+  settings: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="8"/><circle cx="24" cy="24" r="15"/><line x1="24" y1="3" x2="24" y2="9" transform="rotate(0 24 24)"/><line x1="24" y1="3" x2="24" y2="9" transform="rotate(45 24 24)"/><line x1="24" y1="3" x2="24" y2="9" transform="rotate(90 24 24)"/><line x1="24" y1="3" x2="24" y2="9" transform="rotate(135 24 24)"/><line x1="24" y1="3" x2="24" y2="9" transform="rotate(180 24 24)"/><line x1="24" y1="3" x2="24" y2="9" transform="rotate(225 24 24)"/><line x1="24" y1="3" x2="24" y2="9" transform="rotate(270 24 24)"/><line x1="24" y1="3" x2="24" y2="9" transform="rotate(315 24 24)"/></svg>`,
+  statistik: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="26" width="8" height="14" rx="1" fill="currentColor" stroke="none" opacity="0.18"/><rect x="9" y="26" width="8" height="14" rx="1"/><rect x="20" y="16" width="8" height="24" rx="1" fill="currentColor" stroke="none" opacity="0.18"/><rect x="20" y="16" width="8" height="24" rx="1"/><rect x="31" y="21" width="8" height="19" rx="1" fill="currentColor" stroke="none" opacity="0.18"/><rect x="31" y="21" width="8" height="19" rx="1"/><line x1="6" y1="40" x2="42" y2="40"/></svg>`,
+};
+
+const MENU_TILES = [
+  { icon: MENU_ICONS.pick, label: 'Pick', action: 'menu-pick' },
+  { icon: MENU_ICONS.ticket, label: 'Ticket', action: null },
+  { icon: MENU_ICONS.packen, label: 'Packen', action: 'menu-packen' },
+  { icon: MENU_ICONS.lager, label: 'Lager', action: null },
+  null, null, null,
+  null, null, null,
+  { icon: MENU_ICONS.statistik, label: 'Statistik', action: null }, { icon: MENU_ICONS.settings, label: 'Einstellungen', action: 'go-settings' },
+];
+
+function renderMenu(){
+  const tilesHtml = MENU_TILES.map(t => {
+    if (!t) return `<div class="menu-tile menu-tile-empty"></div>`;
+    if (!t.action) return `<div class="menu-tile menu-tile-disabled"><div class="menu-icon-badge"><div class="menu-icon">${t.icon}</div></div><div class="menu-label">${esc(t.label)}</div></div>`;
+    return `<button class="menu-tile" data-action="${t.action}"><div class="menu-icon-badge"><div class="menu-icon">${t.icon}</div></div><div class="menu-label">${esc(t.label)}</div></button>`;
+  }).join('');
+  return `
+  ${topbarHtml({title:'Büchermaus', rightHtml: `<button class="iconbtn" data-action="switch-user" title="Nutzer wechseln">👤</button><button class="iconbtn" data-action="logout" title="Abmelden">🚪</button>`})}
+  <div class="content">
+    <div class="menu-greeting">${timeBasedGreeting()}, ${esc(state.pickerName)}!</div>
+    <div class="menu-grid">${tilesHtml}</div>
+    <div class="footernote center">© 2026 Büchermaus · v${APP_VERSION}</div>
+  </div>`;
+}
+
+function renderLogin(){
+  return `
+  <div class="content" style="display:flex; align-items:center; min-height:100vh; padding-top:0; padding-bottom:0;">
+    <div class="stack" style="width:100%;">
+      <img class="hero-logo" src="${LOGO_DATA_URI}" alt="Logo" />
+      <div class="section-title center">Anmelden</div>
+      <form class="stack" data-action="login-form">
+        <input type="text" id="login-username" class="url-field" placeholder="Benutzername" autocomplete="username" autofocus />
+        <input type="password" id="login-password" class="url-field" placeholder="Passwort" autocomplete="current-password" />
+        ${state.loginError ? `<div class="status-line status-error">⚠ Benutzername oder Passwort falsch.</div>` : ''}
+        <button class="btn btn-primary btn-block" type="submit">Anmelden</button>
+      </form>
+    </div>
+  </div>`;
+}
+
+function renderUserSelect(){
+  if (state.managingUsers){
+    return `
+    ${topbarHtml({title:'Nutzer verwalten', rightHtml: `<button class="iconbtn" data-action="logout" title="Abmelden">🚪</button>`})}
+    <div class="content stack">
+      <div class="stack">
+        ${state.users.map(u => `
+          <div class="user-row">
+            <div class="user-name">${esc(u)}</div>
+            <button class="remove-x" data-action="remove-user" data-user="${esc(u)}">×</button>
+          </div>`).join('')}
+      </div>
+      <form class="addform" data-action="add-user-form">
+        <input type="text" id="new-user-input" placeholder="Neuer Name…" />
+        <button class="btn btn-primary btn-sm" type="submit">Hinzufügen</button>
+      </form>
+      <button class="btn btn-outline btn-block" data-action="stop-manage-users">Fertig</button>
+    </div>`;
+  }
+  return `
+  ${topbarHtml({title:'Büchermaus', rightHtml: `<button class="iconbtn" data-action="logout" title="Abmelden">🚪</button>`})}
+  <div class="content stack">
+    <div class="section-title center">Willkommen</div>
+    <div class="stack">
+      ${state.users.map(u => {
+        const avatarPhoto = (state.userAvatars || {})[u];
+        return `
+        <div class="user-row-card">
+          <label class="user-avatar-clickable" for="avatarinput-${esc(u)}">
+            ${avatarPhoto ? `<img class="user-avatar-img" src="${esc(avatarPhoto)}" alt="">` : `<div class="user-avatar">${esc(u[0])}</div>`}
+          </label>
+          <input type="file" class="avatar-file-input" id="avatarinput-${esc(u)}" accept="image/*" style="display:none;" data-user="${esc(u)}">
+          <button class="user-choose-btn" data-action="choose-user" data-user="${esc(u)}">
+            <div class="user-name">${esc(u)}</div>
+          </button>
+        </div>`;
+      }).join('')}
+    </div>
+    <button class="btn btn-outline btn-block" data-action="start-manage-users">Nutzer verwalten</button>
+  </div>`;
+}
+
+const SETTINGS_MENU_TILES = [
+  { icon: MENU_ICONS.settings, label: 'Systemeinstellungen', action: 'go-settings-detail' },
+  null, null,
+  null, null, null,
+  null, null, null,
+  null, null, null,
+];
+
+function renderSettingsMenu(){
+  const tilesHtml = SETTINGS_MENU_TILES.map(t => {
+    if (!t) return `<div class="menu-tile menu-tile-empty"></div>`;
+    if (!t.action) return `<div class="menu-tile menu-tile-disabled"><div class="menu-icon-badge"><div class="menu-icon">${t.icon}</div></div><div class="menu-label">${esc(t.label)}</div></div>`;
+    return `<button class="menu-tile" data-action="${t.action}"><div class="menu-icon-badge"><div class="menu-icon">${t.icon}</div></div><div class="menu-label">${esc(t.label)}</div></button>`;
+  }).join('');
+  return `
+  ${topbarHtml({title:'Einstellungen', rightHtml: `<button class="iconbtn" data-action="back-from-settings-menu">← Zurück</button>`})}
+  <div class="content">
+    <div class="menu-grid">${tilesHtml}</div>
+  </div>`;
+}
+
+function renderSettings(){
+  return `
+  ${topbarHtml({title:'Systemeinstellungen', rightHtml:`<button class="iconbtn" data-action="back-from-settings">← Zurück</button>`})}
+  <div class="content stack">
+    <button class="settings-bubble" data-action="go-settings-picklist">
+      <span class="settings-bubble-icon">📄</span>
+      <span class="settings-bubble-label">Zentrale Pickliste-Quelle</span>
+    </button>
+    <button class="settings-bubble" data-action="go-settings-address">
+      <span class="settings-bubble-icon">📇</span>
+      <span class="settings-bubble-label">Adressdaten</span>
+    </button>
+    <button class="settings-bubble settings-bubble-danger" data-action="mark-all-picked">
+      <span class="settings-bubble-icon">⚠️</span>
+      <span class="settings-bubble-label">Alle Artikel auf gepickt setzen</span>
+    </button>
+  </div>`;
+}
+
+function renderSettingsPicklist(){
+  const statusHtml = state.fetchStatus === 'checking'
+    ? `<div class="status-line status-checking">⏳ Prüfe Quelle…</div>`
+    : state.fetchStatus === 'ok'
+    ? `<div class="status-line status-ok">✓ Zuletzt erfolgreich geprüft ${state.meta ? '· ' + esc(state.meta.totalItems) + ' Positionen' : ''}</div>`
+    : state.fetchStatus === 'error'
+    ? `<div class="status-line status-error">⚠ Fehler beim Laden: ${esc(state.fetchError || '')}</div>`
+    : '';
+
+  return `
+  ${topbarHtml({title:'Pickliste-Quelle', rightHtml:`<button class="iconbtn" data-action="back-from-settings-sub">← Zurück</button>`})}
+  <div class="content stack">
+    <div class="notice">Der Link zu eurer Pickliste-Datei ist bereits fest hinterlegt – hier musst du normalerweise nichts eintragen. Nur falls sich der Speicherort mal ändert, kannst du hier einen abweichenden Link hinterlegen. Die App prüft die Quelle automatisch alle paar Minuten auf Änderungen.</div>
+    <form class="stack" data-action="save-url-form">
+      <div>
+        <label class="field-label">Datei-Link</label>
+        <input type="url" id="source-url-input" class="url-field" placeholder="https://…" value="${esc(state.sourceUrl || '')}" />
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">Speichern &amp; jetzt prüfen</button>
+    </form>
+    ${statusHtml ? `<div>${statusHtml}</div>` : ''}
+    <button class="btn btn-outline btn-block" data-action="force-reimport">🔄 Pickliste komplett neu verarbeiten</button>
+  </div>`;
+}
+
+function renderSettingsAddress(){
+  return `
+  ${topbarHtml({title:'Adressdaten', rightHtml:`<button class="iconbtn" data-action="back-from-settings-sub">← Zurück</button>`})}
+  <div class="content stack">
+    <div class="notice">Datei mit Kundenadressen, verknüpft über die Rech-Nr. – wird für die Anzeige beim Packen genutzt. Auch hier ist der Link bereits fest hinterlegt.</div>
+    <form class="stack" data-action="save-address-url-form">
+      <div>
+        <label class="field-label">Datei-Link</label>
+        <input type="url" id="address-url-input" class="url-field" placeholder="https://…" value="${esc(state.addressSourceUrl || '')}" />
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">Speichern &amp; jetzt laden</button>
+    </form>
+  </div>`;
+}
+
+function boxRecommendation(openCount){
+  return openCount > 0 ? Math.ceil(openCount / ITEMS_PER_BOX) : 0;
+}
+
+function zoneStats(z){
+  const items = state.items[z] || [];
+  const status = state.status[z] || {};
+  const total = items.length;
+  const done = items.filter(it => status[it.id] && status[it.id].picked).length;
+  const nf = items.filter(it => status[it.id] && status[it.id].notFound).length;
+  return {total, done, open: total-done, nf};
+}
+
+function zoneDamageCount(z){
+  const items = state.items[z] || [];
+  const status = state.status[z] || {};
+  return items.filter(it => status[it.id] && status[it.id].damage).length;
+}
+
+function progressColor(pct){
+  if (pct >= 100) return '#2E7D46';
+  if (pct >= 75) return '#2E7D46';
+  if (pct >= 50) return '#D8A620';
+  if (pct >= 25) return '#D9720B';
+  return '#C0392B';
+}
+
+function renderReportBubble(zone, item, type){
+  const status = state.status[zone] || {};
+  const s = status[item.id];
+  const photo = type === 'damage' ? (s.evidencePhoto || s.photo) : s.photo;
+  const coverHtml = coverSlotHtml(zone, item, photo);
+  const titleText = s.titleOverride || item.titel;
+  const reasonHtml = type === 'damage'
+    ? `<div class="report-reason">❗ ${esc(s.damage.reason)}</div>`
+    : `<div class="report-reason">✕ Nicht gefunden</div>`;
+  const metaText = type === 'damage'
+    ? `${esc(s.damage.by)} · ${timeAgo(s.damage.at)}`
+    : `gemeldet von ${esc(s.by)} · ${timeAgo(s.at)}`;
+  return `
+  <div class="report-bubble ${type === 'damage' ? 'report-bubble-damage' : 'report-bubble-nf'}">
+    ${coverHtml}
+    <div class="report-main">
+      <div class="item-lf-inline">${esc(item.lagerfach)}</div>
+      <div class="report-title">${esc(titleText)}</div>
+      ${reasonHtml}
+      <div class="report-meta">Bestellnr. ${esc(item.bestellnummer)} · ${metaText}</div>
+    </div>
+  </div>`;
+}
+
+function renderReportBubbles(zone){
+  const status = state.status[zone] || {};
+  const items = state.items[zone] || [];
+  const nfItems = items.filter(it => status[it.id] && status[it.id].notFound);
+  const dmgItems = items.filter(it => status[it.id] && status[it.id].damage);
+  if (!nfItems.length && !dmgItems.length) return '';
+  const bubbles = nfItems.map(it => renderReportBubble(zone, it, 'nf')).join('')
+    + dmgItems.map(it => renderReportBubble(zone, it, 'damage')).join('');
+  return `<div class="report-bubble-list">${bubbles}</div>`;
+}
+
+function scopedStats(zone, itemsSubset){
+  const status = state.status[zone] || {};
+  const total = itemsSubset.length;
+  const done = itemsSubset.filter(it => status[it.id] && status[it.id].picked).length;
+  const nf = itemsSubset.filter(it => status[it.id] && status[it.id].notFound).length;
+  return {total, done, open: total-done, nf};
+}
+
+function renderZoneEntry(){
+  const zone = state.pendingZone;
+  const def = ZONE_DEFS[zone] || {label:'Sonstige', range:'', color:'var(--ink-soft)'};
+  const items = itemsForZone(zone);
+  const assignment = state.assignment[zone] || {};
+  const assignedIds = new Set(Object.keys(assignment));
+  const availableCount = items.filter(it => !assignedIds.has(it.id)).length;
+  const counts = assignmentCounts(assignment);
+  const alreadyMine = counts[state.pickerName] || 0;
+  const isExtend = alreadyMine > 0;
+  const claimsHtml = Object.entries(counts).map(([name, count]) => `
+    <div class="claim-row">
+      <span>${esc(name)}: ${count} Artikel zugeteilt</span>
+      <button class="btn btn-outline btn-sm" data-action="release-assignment" data-zone="${zone}" data-picker="${esc(name)}">Freigeben</button>
+    </div>`).join('');
+  const claimedBoxCount = Math.min(state.zoneBoxCount * ITEMS_PER_BOX, availableCount);
+  return `
+  ${topbarHtml({
+    title: def.label,
+    sub: isExtend ? `Du hast bereits ${alreadyMine} Artikel zugeteilt` : `${availableCount} Artikel noch frei verfügbar`,
+    rightHtml: `<button class="iconbtn" data-action="cancel-zone-entry">← Zurück</button>`,
+  })}
+  <div class="content" style="display:flex; align-items:center; min-height:calc(100vh - 120px);">
+  <div class="stack center" style="width:100%;">
+    ${!isExtend ? `
+      <button class="btn btn-primary btn-block" data-action="claim-full" data-zone="${zone}" ${availableCount===0 ? 'disabled' : ''}>Ganzen Bereich picken</button>
+      <div class="section-title center">Oder nur einen Teilbereich</div>
+    ` : `<div class="section-title center">Weitere Kisten zuteilen</div>`}
+    <div class="stepper-row stepper-row-brand">
+      <button type="button" class="stepper-btn stepper-btn-brand" data-action="box-dec">−</button>
+      <div class="stepper-value stepper-value-brand">${state.zoneBoxCount} Kiste${state.zoneBoxCount===1?'':'n'}<br><span style="font-weight:400; font-size:0.78rem; opacity:0.85;">(~${claimedBoxCount} Artikel)</span></div>
+      <button type="button" class="stepper-btn stepper-btn-brand" data-action="box-inc">+</button>
+    </div>
+    <button class="btn btn-outline btn-block" data-action="claim-partial" data-zone="${zone}" ${availableCount===0 ? 'disabled' : ''}>${isExtend ? 'Weitere Kisten holen' : 'Diese Kisten picken'}</button>
+    ${claimsHtml ? `<div class="section-title center">Bereits zugeteilt</div><div class="stack">${claimsHtml}</div>` : ''}
+  </div>
+  </div>`;
+}
+
+function renderModal(){
+  if (!state.modal) return '';
+  if (state.modal.type === 'edit-title') return renderEditTitleModal();
+  if (state.modal.type === 'damage') return renderDamageModal();
+  if (state.modal.type === 'manage-damage-reasons') return renderManageDamageReasonsModal();
+  if (state.modal.type === 'pack-block') return renderPackBlockModal();
+  return '';
+}
+
+function renderPackBlockModal(){
+  const { zone, itemId, reason } = state.modal;
+  const item = (state.items[zone] || []).find(x => x.id === itemId);
+  const st = (state.status[zone] || {})[itemId] || {};
+  const titleText = item ? (st.titleOverride || item.titel) : '';
+  return `
+  <div class="modal-overlay" data-action="close-modal-bg">
+    <div class="modal-box" data-action="noop">
+      <div class="section-title">Versand nicht möglich</div>
+      <div style="margin-top:6px; font-weight:600;">${esc(titleText)}</div>
+      ${item ? `<div class="faint" style="margin-top:2px; font-size:0.85rem;">Lagerfach ${esc(item.lagerfach)} · Bestellnr. ${esc(item.bestellnummer)}</div>` : ''}
+      <div class="report-reason" style="margin-top:12px;">⚠ ${esc(reason)}</div>
+      <button type="button" class="btn btn-outline btn-block" style="margin-top:16px;" data-action="close-modal">Schließen</button>
+    </div>
+  </div>`;
+}
+
+function renderEditTitleModal(){
+  const {zone, itemId} = state.modal;
+  const item = (state.items[zone] || []).find(x => x.id === itemId);
+  const st = (state.status[zone] || {})[itemId];
+  const currentTitle = (st && st.titleOverride) || (item ? item.titel : '');
+  return `
+  <div class="modal-overlay" data-action="close-modal-bg">
+    <div class="modal-box" data-action="noop">
+      <div class="section-title">Titel bearbeiten</div>
+      <form data-action="save-title-form">
+        <textarea id="edit-title-input" class="url-field" style="min-height:80px;">${esc(currentTitle)}</textarea>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" data-action="close-modal">Abbrechen</button>
+          <button type="submit" class="btn btn-primary">Speichern</button>
+        </div>
+      </form>
+    </div>
+  </div>`;
+}
+
+function renderDamageModal(){
+  const {zone, itemId} = state.modal;
+  const st = (state.status[zone] || {})[itemId] || {};
+  const current = st.damage;
+  const reasonsHtml = state.damageReasons.map(r => `
+    <button class="btn ${current && current.reason === r ? 'btn-primary' : 'btn-outline'} btn-block" data-action="set-damage" data-zone="${zone}" data-id="${itemId}" data-reason="${esc(r)}">${esc(r)}</button>
+  `).join('');
+  const evidenceInputId = 'evidence-photoinput-' + itemId;
+  return `
+  <div class="modal-overlay" data-action="close-modal-bg">
+    <div class="modal-box" data-action="noop">
+      <div class="section-title">Artikel als beschädigt melden</div>
+      <div class="stack">
+        ${reasonsHtml}
+      </div>
+      ${st.evidencePhoto ? `<img src="${esc(st.evidencePhoto)}" class="evidence-preview" alt="Beleg-Foto">` : ''}
+      <div class="modal-photo-row">
+        <label class="btn btn-outline btn-sm" for="${evidenceInputId}">📷 ${st.evidencePhoto ? 'Beleg-Foto ersetzen' : 'Beleg-Foto aufnehmen'}</label>
+        <input type="file" id="${evidenceInputId}" accept="image/*" capture="environment" style="display:none;" data-zone="${zone}" data-id="${itemId}" data-photo-kind="evidence">
+        <div style="display:flex; gap:8px; align-items:center;">
+          ${current ? `<button type="button" class="remove-x" data-action="clear-damage" data-zone="${zone}" data-id="${itemId}" title="Meldung entfernen">×</button>` : ''}
+          <button type="button" class="iconbtn" style="background:var(--surface-2); color:var(--ink-soft); border-color:var(--line);" data-action="manage-damage-reasons" title="Gründe verwalten">⚙</button>
+        </div>
+      </div>
+      <button type="button" class="btn btn-outline btn-block" style="margin-top:14px;" data-action="close-modal">Schließen</button>
+    </div>
+  </div>`;
+}
+
+function renderManageDamageReasonsModal(){
+  return `
+  <div class="modal-overlay" data-action="close-modal-bg">
+    <div class="modal-box" data-action="noop">
+      <div class="section-title">Schadensgründe verwalten</div>
+      <div class="stack">
+        ${state.damageReasons.map(r => `
+          <div class="user-row">
+            <div class="user-name" style="text-transform:none; font-family:inherit; font-weight:500;">${esc(r)}</div>
+            <button class="remove-x" data-action="remove-damage-reason" data-reason="${esc(r)}">×</button>
+          </div>`).join('')}
+      </div>
+      <form class="addform" data-action="add-damage-reason-form">
+        <input type="text" id="new-damage-reason-input" placeholder="Neuer Grund…" />
+        <button class="btn btn-primary btn-sm" type="submit">Hinzufügen</button>
+      </form>
+      <button type="button" class="btn btn-outline btn-block" style="margin-top:10px;" data-action="close-modal">Fertig</button>
+    </div>
+  </div>`;
+}
+
+
+function renderLobby(){
+  const sub = esc(state.pickerName);
+  const rightHtml = `<button class="iconbtn" data-action="switch-user" title="Nutzer wechseln">👤</button>${menuBtn()}`;
+
+  if (!state.meta){
+    let statusLine = 'Noch keine Pickliste gefunden.';
+    if (!state.sourceUrl) statusLine = 'Es ist noch keine Pickliste-Quelle eingerichtet.';
+    else if (state.fetchStatus === 'checking') statusLine = 'Prüfe auf eine aktuelle Pickliste …';
+    else if (state.fetchStatus === 'error') statusLine = 'Konnte die Pickliste nicht laden: ' + esc(state.fetchError || '');
+    return `
+    ${topbarHtml({title:'Pickliste', sub, rightHtml})}
+    <div class="content">
+      <div class="empty-state">
+        <div class="big">📭</div>
+        <div>${statusLine}</div>
+        <button class="btn btn-primary" style="margin-top:14px;" data-action="go-settings">Einstellungen öffnen</button>
+      </div>
+    </div>`;
+  }
+
+  const zones = ZONE_ORDER.filter(z => (state.items[z]||[]).length > 0);
+  if ((state.items.Sonstige||[]).length > 0) zones.push('Sonstige');
+
+  const tiles = zones.map(z => {
+    const def = ZONE_DEFS[z] || {label:'Sonstige', range:'nicht zugeordnet', color:'var(--ink-soft)'};
+    const st = zoneStats(z);
+    const pct = st.total ? Math.round((st.done/st.total)*100) : 0;
+    const isZoneDone = st.total > 0 && st.done === st.total;
+    const dmgCount = zoneDamageCount(z);
+    const presence = state.presence[z] || {};
+    const activeNames = Object.entries(presence).filter(([,p]) => Date.now()-p.at < 1000*60*30).sort((a,b)=>b[1].at-a[1].at);
+    return `
+    <div class="zone-block">
+    <div class="zone-tile" style="--zc:${def.color}" data-action="enter-zone" data-zone="${z}">
+      ${isZoneDone ? `<div class="zone-done-badge">✓ Erledigt</div>` : ''}
+      <div class="${isZoneDone ? 'zone-tile-dim' : ''}">
+        <div class="zone-head">
+          <div><div class="zone-name">${esc(def.label)}</div><div class="faint" style="font-size:0.78rem; margin-top:2px;">${esc(def.range)}</div></div>
+          <div class="zone-count">${st.open} / ${st.total}</div>
+        </div>
+      </div>
+      <div class="zone-progress-track"><div class="zone-progress-fill" style="width:${pct}%; background:${progressColor(pct)};"></div></div>
+      <div class="${isZoneDone ? 'zone-tile-dim' : ''}">
+        ${st.open > 0 ? `<div class="zone-boxes">📦 ca. ${boxRecommendation(st.open)} Kiste${boxRecommendation(st.open)===1?'':'n'} empfohlen</div>` : ''}
+        ${activeNames.length ? `<div class="zone-presence">${activeNames.map(([n,p]) => `<span class="pill">${esc(n)} · ${esc(p.lagerfach)} · ${timeAgo(p.at)}</span>`).join('')}</div>` : ''}
+      </div>
+    </div>
+    ${renderReportBubbles(z)}
+    </div>`;
+  }).join('');
+
+  const banner = state.pendingUpdate ? `
+    <div class="update-banner">
+      <span>📥 Neue Pickliste erkannt (${timeAgo(state.pendingUpdate.fetchedAt)})</span>
+      <button class="btn btn-primary btn-sm" data-action="apply-update">Jetzt laden</button>
+    </div>` : '';
+
+  return `
+  ${topbarHtml({title:'Pickliste', sub: `${sub} · ${esc(state.meta.totalItems)} Positionen`, rightHtml})}
+  <div class="content stack">
+    ${banner}
+    <div>
+      <div class="section-title">Bereich wählen</div>
+      <div class="stack">${tiles}</div>
+    </div>
+  </div>`;
+}
+
+function renderItemCard(zone, item, def){
+  const st = (state.status[zone] || {})[item.id];
+  const presence = state.presence[zone] || {};
+  const markers = Object.entries(presence).filter(([n,p]) => p.itemId === item.id && n !== (st && st.by));
+  let stamp = '';
+  if (st && st.picked){
+    const label = st.notFound ? 'Fehlt · ' + initials(st.by) : 'Erledigt · ' + initials(st.by);
+    stamp = `<div class="stamp ${st.notFound ? 'nf' : ''}">${esc(label)}</div>`;
+  }
+  const coverHtml = coverSlotHtml(zone, item, st && st.photo);
+  const editIcons = `
+      <button class="icon-sq-btn" data-action="edit-title" data-zone="${zone}" data-id="${esc(item.id)}" title="Titel bearbeiten">✏️</button>
+      <button class="icon-sq-btn ${st && st.damage ? 'icon-sq-btn-active' : ''}" data-action="open-damage" data-zone="${zone}" data-id="${esc(item.id)}" title="Schaden melden">⚠️</button>`;
+  const actionsHtml = !(st && st.picked) ? `
+      <button class="btn btn-primary btn-sm" data-action="pick" data-zone="${zone}" data-id="${esc(item.id)}">✓ Gepickt</button>
+      <button class="pin-btn-stacked" data-action="markhere" data-zone="${zone}" data-id="${esc(item.id)}">📍 Hier starten</button>
+      <div class="icon-row">${editIcons}<button class="nf-btn" style="flex:1;" data-action="notfound" data-zone="${zone}" data-id="${esc(item.id)}">Nicht gefunden</button></div>
+    ` : `<div class="icon-row">${editIcons}<button class="undo-btn" style="flex:1;" data-action="undo" data-zone="${zone}" data-id="${esc(item.id)}">Rückgängig</button></div>`;
+  const displayTitle = (st && st.titleOverride) || item.titel;
+  const extraInfo = (zone === 'M' && item.titelLang && item.titelLang.trim() !== item.titel.trim())
+    ? `<div class="item-subtitle">${esc(item.titelLang)}</div>`
+    : '';
+  const damageInfo = st && st.damage
+    ? `<div class="damage-marker">⚠ ${esc(st.damage.reason)} · ${esc(initials(st.damage.by))}${st.evidencePhoto ? ' · 📷' : ''}</div>`
+    : '';
+  return `
+  <div class="item ${st && st.picked ? 'done' : ''}" id="item-${esc(item.id)}" style="--zc:${def.color}">
+    ${coverHtml}
+    <div class="item-main">
+      <div class="item-lf-inline">${esc(item.lagerfach)}</div>
+      <div class="item-title">${esc(displayTitle)}${item.menge>1 ? `<span class="qty-badge">×${item.menge}</span>`:''}</div>
+      ${extraInfo}
+      ${damageInfo}
+      <div class="item-meta"><span>Bestellnr. ${esc(item.bestellnummer)}</span></div>
+      ${markers.length ? `<div class="marker-row">${markers.map(([n]) => `<span class="marker">📍 ${esc(n)}</span>`).join('')}</div>` : ''}
+    </div>
+    <div class="item-actions-col">
+      ${stamp}
+      ${actionsHtml}
+    </div>
+  </div>`;
+}
+
+function lastPickedInfo(zone, itemsSubset){
+  const status = state.status[zone] || {};
+  let best = null;
+  for (const it of itemsSubset){
+    const s = status[it.id];
+    if (s && s.picked && (!best || s.at > best.s.at)) best = { item: it, s };
+  }
+  if (!best) return null;
+  return { lagerfach: best.item.lagerfach, titel: best.s.titleOverride || best.item.titel };
+}
+
+function renderPicking(){
+  const zone = state.currentZone;
+  const def = ZONE_DEFS[zone] || {label:'Sonstige', range:'', color:'var(--ink-soft)'};
+  const assignment = state.assignment[zone] || {};
+  const myAssignedIds = new Set(Object.entries(assignment).filter(([,a]) => a.by === state.pickerName).map(([id]) => id));
+  const hasPartial = myAssignedIds.size > 0;
+  let allItems = state.items[zone] || [];
+  if (hasPartial) allItems = allItems.filter(it => myAssignedIds.has(it.id));
+  const status = state.status[zone] || {};
+  const st = scopedStats(zone, allItems);
+  const pct = st.total ? Math.round((st.done/st.total)*100) : 0;
+  const visible = allItems.filter(it => {
+    const s = status[it.id];
+    if (state.pickFilter === 'all') return true;
+    if (state.pickFilter === 'notfound') return !!(s && s.notFound);
+    if (state.pickFilter === 'problems') return !!(s && s.damage);
+    return !(s && s.picked); // 'open' (Standard)
+  });
+  const presence = state.presence[zone] || {};
+  const lastPick = lastPickedInfo(zone, allItems);
+  const list = visible.length ? visible.map(it => {
+    const here = Object.entries(presence).filter(([,p]) => p.itemId === it.id && Date.now()-p.at < 1000*60*30);
+    const divider = here.length ? `<div class="start-divider"><span>Ab hier arbeitet ${here.map(([n]) => esc(n)).join(', ')}</span></div>` : '';
+    return divider + renderItemCard(zone, it, def);
+  }).join('') : `<div class="empty-state"><div class="big">🎉</div>Nichts in dieser Ansicht.</div>`;
+
+  return `
+  ${topbarHtml({
+    title: def.label,
+    sub: `${esc(state.pickerName)} · ${st.done} / ${st.total} erledigt${st.nf ? ' · ' + st.nf + ' nicht gefunden' : ''}${hasPartial ? ' · Teilbereich' : ''}`,
+    rightHtml: `<button class="iconbtn" data-action="leave-zone">← Bereiche</button>${menuBtn()}`,
+    progressPct: pct, bg: def.color,
+    extraHtml: lastPick ? `<div class="topbar-banner"><span class="lp-label">Zuletzt</span><span class="lp-lagerfach">${esc(lastPick.lagerfach)}</span><span class="lp-title">${esc(lastPick.titel)}</span></div>` : '',
+  })}
+  <div class="content">
+    ${hasPartial ? `<button class="btn btn-outline btn-sm" style="margin-bottom:14px;" data-action="request-more-boxes" data-zone="${zone}">+ Mehr Kisten zuteilen</button>` : ''}
+    <div class="picking-tools">
+      <select id="pick-filter-select" class="url-field" style="max-width:150px; flex-shrink:0;">
+        <option value="open" ${state.pickFilter === 'open' ? 'selected' : ''}>Nur offen</option>
+        <option value="all" ${state.pickFilter === 'all' ? 'selected' : ''}>Alle</option>
+        <option value="notfound" ${state.pickFilter === 'notfound' ? 'selected' : ''}>Nicht gefunden</option>
+        <option value="problems" ${state.pickFilter === 'problems' ? 'selected' : ''}>Probleme</option>
+      </select>
+      <form class="jumpform" data-action="jump-form">
+        <input type="text" id="jump-input" placeholder="Sprung zu Lagerfach / Position…" />
+        <button class="btn btn-outline btn-sm" type="submit">Los</button>
+      </form>
+    </div>
+    <div class="stack">${list}</div>
+  </div>`;
+}
+
+function staticCoverHtml(item, photo){
+  const coverId = 'cover-' + item.id;
+  if (photo) return `<img class="item-cover" id="${coverId}" src="${esc(photo)}" alt="">`;
+  if (!item.code) return `<div class="item-cover item-cover-none" id="${coverId}">Kein Bild<br>verfügbar</div>`;
+  const cached = coverCache[item.code];
+  if (cached === 'NONE') return `<div class="item-cover item-cover-none" id="${coverId}">Kein Bild<br>verfügbar</div>`;
+  if (cached) return `<img class="item-cover" id="${coverId}" src="${esc(cached)}" alt="">`;
+  return `<div class="item-cover item-cover-loading" id="${coverId}" data-code="${esc(item.code)}" data-title="${esc(item.titel)}"></div>`;
+}
+
+function renderAddressBlock(item){
+  const addr = state.addressLookup[item.rechNr];
+  if (!addr) return `<div class="pack-address faint">Keine Adresse gefunden</div>`;
+  return `
+  <div class="pack-address">
+    <div class="pack-address-name">${esc(addr.name)}</div>
+    ${addr.zuhaenden ? `<div>${esc(addr.zuhaenden)}</div>` : ''}
+    <div>${esc(addr.strasse)}</div>
+    <div>${esc(addr.plzOrt)}</div>
+    ${addr.gewicht ? `<div class="faint">Gewicht: ${esc(addr.gewicht)}</div>` : ''}
+  </div>`;
+}
+
+function renderPackItemCard(zone, item){
+  const status = state.status[zone] || {};
+  const s = status[item.id] || {};
+  const titleText = s.titleOverride || item.titel;
+  const pState = packItemState(zone, item);
+
+  if (pState.blocked){
+    const coverHtml = staticCoverHtml(item, s.photo);
+    return `
+    <div class="item pack-blocked" data-action="show-pack-block" data-zone="${zone}" data-id="${esc(item.id)}" data-reason="${esc(pState.reason)}">
+      <div class="pack-block-badge">⚠</div>
+      ${coverHtml}
+      <div class="item-main">
+        <div class="item-lf-inline">${esc(item.lagerfach)}</div>
+        <div class="item-title">${esc(titleText)}${item.menge>1 ? `<span class="qty-badge">×${item.menge}</span>`:''}</div>
+        <div class="item-meta"><span>Bestellnr. ${esc(item.bestellnummer)} · Rech-Nr. ${esc(item.rechNr || '–')}</span></div>
+      </div>
+    </div>`;
+  }
+
+  const isPacked = !!s.packed;
+  const isProblem = !!s.packProblem;
+  const coverHtml = coverSlotHtml(zone, item, s.photo);
+  const related = !isPacked ? relatedOrderItems(zone, item) : [];
+  const relatedHtml = related.length ? `
+    <div class="pack-related-hint">
+      <div class="pack-related-title">📦 Noch ${related.length} weitere${related.length===1?'r':''} Artikel für diese Sendung:</div>
+      <div class="pack-related-list">
+        ${related.map(r => `<span class="pack-related-badge ${r.picked ? '' : 'pack-related-badge-open'}">${esc(r.item.lagerfach)}${r.picked ? '' : ' · offen'}</span>`).join('')}
+      </div>
+    </div>` : '';
+  const actionHtml = isPacked
+    ? `<button class="undo-btn" data-action="unpack" data-zone="${zone}" data-id="${esc(item.id)}">Rückgängig</button>`
+    : `
+      <div class="pack-actions">
+        <div class="pack-actions-row">
+          <button class="pack-method-btn" data-action="pack" data-zone="${zone}" data-id="${esc(item.id)}" data-method="brief"><span class="pack-method-icon">✉️</span><span>Brief</span></button>
+          <button class="pack-method-btn" data-action="pack" data-zone="${zone}" data-id="${esc(item.id)}" data-method="paket"><span class="pack-method-icon">📦</span><span>Paket</span></button>
+        </div>
+        <button class="pack-problem-btn ${isProblem ? 'pack-problem-btn-active' : ''}" data-action="${isProblem ? 'clear-problem' : 'mark-problem'}" data-zone="${zone}" data-id="${esc(item.id)}">${isProblem ? '✕ Problem entfernen' : '⚠ Problem'}</button>
+      </div>`;
+  return `
+  <div class="item ${isPacked ? 'done' : ''}" style="${isProblem ? 'position:relative;' : ''}">
+    ${isProblem ? `<div class="pack-problem-badge">⚠ Problem gemeldet</div>` : ''}
+    ${coverHtml}
+    <div class="item-main">
+      <div class="item-lf-inline">${esc(item.lagerfach)}</div>
+      <div class="item-title">${esc(titleText)}${item.menge>1 ? `<span class="qty-badge">×${item.menge}</span>`:''}</div>
+      <div class="item-meta"><span>Bestellnr. ${esc(item.bestellnummer)} · Rech-Nr. ${esc(item.rechNr || '–')}</span></div>
+      ${relatedHtml}
+    </div>
+    ${!isPacked ? renderAddressBlock(item) : ''}
+    <div class="item-actions-col">
+      ${actionHtml}
+    </div>
+  </div>`;
+}
+
+function renderPacken(){
+  const all = allPackItems();
+  const packableStates = all.map(({zone, item}) => packItemState(zone, item)).filter(s => !s.blocked);
+  const total = packableStates.length;
+  const packedCount = packableStates.filter(s => s.packed).length;
+  const pct = total ? Math.round((packedCount/total)*100) : 0;
+  const visible = all.filter(({zone, item}) => {
+    const s = (state.status[zone] || {})[item.id];
+    return !(s && s.packed);
+  });
+  const list = visible.length
+    ? visible.map(({zone, item}) => renderPackItemCard(zone, item)).join('')
+    : `<div class="empty-state"><div class="big">🎉</div>Alles verpackt.</div>`;
+
+  return `
+  ${topbarHtml({
+    title: 'Packen',
+    sub: `${packedCount} / ${total} verpackt`,
+    rightHtml: `<button class="iconbtn" data-action="go-gepackt">📬 Gepackt (${packedCount})</button>${menuBtn()}`,
+    progressPct: pct,
+  })}
+  <div class="content">
+    <div class="stack">${list}</div>
+  </div>`;
+}
+
+function renderGepacktItemCard(zone, item){
+  const status = state.status[zone] || {};
+  const s = status[item.id] || {};
+  const titleText = s.titleOverride || item.titel;
+  const coverHtml = coverSlotHtml(zone, item, s.photo);
+  const methodLabel = s.packed && s.packed.method === 'brief' ? '✉️ Brief' : '📦 Paket';
+  return `
+  <div class="item done">
+    ${coverHtml}
+    <div class="item-main">
+      <div class="item-lf-inline">${esc(item.lagerfach)}</div>
+      <div class="item-title">${esc(titleText)}${item.menge>1 ? `<span class="qty-badge">×${item.menge}</span>`:''}</div>
+      <div class="item-meta"><span>Bestellnr. ${esc(item.bestellnummer)} · Rech-Nr. ${esc(item.rechNr || '–')}</span></div>
+      <div class="report-meta">${methodLabel} · ${esc(s.packed.by)} · ${timeAgo(s.packed.at)}</div>
+    </div>
+    <div class="item-actions-col">
+      <button class="undo-btn" data-action="unpack" data-zone="${zone}" data-id="${esc(item.id)}">Rückgängig</button>
+    </div>
+  </div>`;
+}
+
+function renderGepackt(){
+  const all = allPackItems();
+  const packedEntries = [];
+  for (const {zone, item} of all){
+    const s = (state.status[zone] || {})[item.id];
+    if (s && s.packed) packedEntries.push({ zone, item, at: s.packed.at });
+  }
+  packedEntries.sort((a,b) => b.at - a.at);
+  const list = packedEntries.length
+    ? packedEntries.map(({zone, item}) => renderGepacktItemCard(zone, item)).join('')
+    : `<div class="empty-state"><div class="big">📭</div>Noch nichts verpackt.</div>`;
+
+  return `
+  ${topbarHtml({title:'Gepackt', sub: `${packedEntries.length} verpackt`, rightHtml: `<button class="iconbtn" data-action="back-to-packen">← Packen</button>${menuBtn()}`})}
+  <div class="content">
+    <div class="stack">${list}</div>
+  </div>`;
+}
+
+function renderOverview(){
+  const rows = ZONE_ORDER.concat(['Sonstige']).filter(z => (state.items[z]||[]).length>0).map(z => {
+    const def = ZONE_DEFS[z] || {label:'Sonstige', color:'var(--ink-soft)'};
+    const st = zoneStats(z);
+    const pct = st.total ? Math.round((st.done/st.total)*100) : 0;
+    return `<div class="card" style="padding:14px; border-left:5px solid ${def.color};">
+      <div class="zone-head"><div class="zone-name">${esc(def.label)}</div><div class="zone-count">${st.done}/${st.total}</div></div>
+      <div class="zone-progress-track"><div class="zone-progress-fill" style="background:${def.color}; width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+
+  const nfItems = [];
+  for (const z of ZONE_ORDER.concat(['Sonstige'])){
+    const status = state.status[z] || {};
+    for (const it of (state.items[z]||[])){
+      if (status[it.id] && status[it.id].notFound) nfItems.push({...it, meta: status[it.id]});
+    }
+  }
+  const nfHtml = nfItems.length
+    ? nfItems.map(it => `<div class="item nf-list-item" style="padding:12px;">
+        <div class="item-lf" style="background:var(--danger);">${esc(it.lagerfach)}</div>
+        <div class="item-main">
+          <div class="item-title">${esc(it.titel)}</div>
+          <div class="item-meta"><span>Bestellnr. ${esc(it.bestellnummer)}</span><span>gemeldet von ${esc(it.meta.by)} · ${timeAgo(it.meta.at)}</span></div>
+        </div>
+      </div>`).join('')
+    : `<div class="empty-state">Keine offenen "nicht gefunden"-Meldungen.</div>`;
+
+  const damageItems = [];
+  for (const z of ZONE_ORDER.concat(['Sonstige'])){
+    const status = state.status[z] || {};
+    for (const it of (state.items[z]||[])){
+      if (status[it.id] && status[it.id].damage) damageItems.push({...it, meta: status[it.id]});
+    }
+  }
+  const damageHtml = damageItems.length
+    ? damageItems.map(it => `<div class="item nf-list-item" style="padding:12px; border-left-color:#C97A2E;">
+        <div class="item-lf" style="background:#C97A2E;">${esc(it.lagerfach)}</div>
+        <div class="item-main">
+          <div class="item-title">${esc((it.meta.titleOverride) || it.titel)}</div>
+          <div class="item-meta"><span>Bestellnr. ${esc(it.bestellnummer)}</span><span>${esc(it.meta.damage.reason)} · gemeldet von ${esc(it.meta.damage.by)} · ${timeAgo(it.meta.damage.at)}</span></div>
+          ${it.meta.evidencePhoto ? `<img src="${esc(it.meta.evidencePhoto)}" class="evidence-preview" style="max-height:120px; margin-top:8px;" alt="Beleg-Foto">` : ''}
+        </div>
+      </div>`).join('')
+    : `<div class="empty-state">Keine Schadensmeldungen.</div>`;
+
+  return `
+  ${topbarHtml({title:'Übersicht', rightHtml:`<button class="iconbtn" data-action="back-from-overview">← Zurück</button>`})}
+  <div class="content stack">
+    <div class="section-title">Fortschritt je Bereich</div>
+    <div class="stack">${rows}</div>
+    <div class="section-title">Nicht gefunden (Nacharbeit)</div>
+    <div class="stack">${nfHtml}</div>
+    <div class="section-title">Schadensmeldungen</div>
+    <div class="stack">${damageHtml}</div>
+    <div class="footernote">Pickliste-Tool · lokal geteilt über diesen Link</div>
+  </div>`;
+}
+
+/* ============ Event binding ============ */
+function bindDynamicHandlers(){
+  const pickFilterSelect = document.getElementById('pick-filter-select');
+  if (pickFilterSelect) pickFilterSelect.addEventListener('change', (e) => { state.pickFilter = e.target.value; render(); });
+  document.querySelectorAll('input[type="file"][data-zone][data-id]').forEach(input => {
+    input.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const zone = input.dataset.zone, itemId = input.dataset.id;
+      const kind = input.dataset.photoKind || 'cover';
+      try{
+        const dataUrl = await compressImageFile(file);
+        if (kind === 'evidence') await setEvidencePhoto(zone, itemId, dataUrl);
+        else { await setCustomPhoto(zone, itemId, dataUrl); state.modal = null; }
+      }catch(err){ console.error('Foto konnte nicht verarbeitet werden', err); }
+      render();
+    });
+  });
+  document.querySelectorAll('input.avatar-file-input[data-user]').forEach(input => {
+    input.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const username = input.dataset.user;
+      try{
+        const dataUrl = await compressImageFile(file);
+        await setUserAvatar(username, dataUrl);
+      }catch(err){ console.error('Nutzerfoto konnte nicht verarbeitet werden', err); }
+      render();
+    });
+  });
+  initCoverResolution();
+}
+
+document.getElementById('app').addEventListener('click', async (e) => {
+  const t = e.target.closest('[data-action]');
+  if (!t) return;
+  const action = t.dataset.action;
+  if (action === 'menu-pick'){ state.screen = 'lobby'; render(); await loadAllZoneData(); render(); return; }
+  if (action === 'menu-packen'){ state.screen = 'packen'; render(); await loadAllZoneData(); render(); startPackPolling(); return; }
+  if (action === 'pack'){ const z=t.dataset.zone, it=(state.items[z]||[]).find(x=>x.id===t.dataset.id); if(it) await packItem(z,it,t.dataset.method); return; }
+  if (action === 'unpack'){ const z=t.dataset.zone, it=(state.items[z]||[]).find(x=>x.id===t.dataset.id); if(it) await unpackItem(z,it); return; }
+  if (action === 'mark-problem'){ const z=t.dataset.zone, it=(state.items[z]||[]).find(x=>x.id===t.dataset.id); if(it) await markProblem(z,it); return; }
+  if (action === 'clear-problem'){ const z=t.dataset.zone, it=(state.items[z]||[]).find(x=>x.id===t.dataset.id); if(it) await clearProblem(z,it); return; }
+  if (action === 'go-gepackt'){ state.screen = 'gepackt'; render(); return; }
+  if (action === 'back-to-packen'){ state.screen = 'packen'; render(); return; }
+  if (action === 'show-pack-block'){ state.modal = { type:'pack-block', zone: t.dataset.zone, itemId: t.dataset.id, reason: t.dataset.reason }; render(); return; }
+  if (action === 'choose-user'){ chooseUser(t.dataset.user); return; }
+  if (action === 'switch-user'){ stopPolling(); state.screen = 'user'; render(); return; }
+  if (action === 'start-manage-users'){ state.managingUsers = true; render(); return; }
+  if (action === 'stop-manage-users'){ state.managingUsers = false; render(); return; }
+  if (action === 'remove-user'){ await removeUserName(t.dataset.user); return; }
+  if (action === 'go-settings'){ state.previousScreen = state.screen; state.screen = 'settings-menu'; render(); return; }
+  if (action === 'go-settings-detail'){ state.screen = 'settings'; render(); return; }
+  if (action === 'logout'){ if (confirm('Wirklich abmelden?')) logout(); return; }
+  if (action === 'go-menu'){ stopPolling(); state.screen = 'menu'; render(); return; }
+  if (action === 'back-from-settings'){ state.screen = 'settings-menu'; render(); return; }
+  if (action === 'back-from-settings-menu'){
+    const target = state.previousScreen || (state.pickerName ? 'menu' : 'user');
+    if (target === 'lobby') await loadAllZoneData();
+    state.screen = target;
+    render();
+    return;
+  }
+  if (action === 'enter-zone'){ await enterZone(t.dataset.zone); return; }
+  if (action === 'go-overview'){ state.screen = 'overview'; render(); return; }
+  if (action === 'back-from-overview'){ if(!state.currentZone) await loadAllZoneData(); state.screen = state.currentZone ? 'picking' : 'lobby'; render(); return; }
+  if (action === 'leave-zone'){ leaveZone(); return; }
+  if (action === 'apply-update'){ await applyPendingUpdate(); return; }
+  if (action === 'force-reimport'){ await forceReimportPicklist(); return; }
+  if (action === 'go-settings-picklist'){ state.screen = 'settings-picklist'; render(); return; }
+  if (action === 'go-settings-address'){ state.screen = 'settings-address'; render(); return; }
+  if (action === 'back-from-settings-sub'){ state.screen = 'settings'; render(); return; }
+  if (action === 'mark-all-picked'){ await markAllItemsPicked(); return; }
+  if (action === 'pick'){ const z=t.dataset.zone, it=(state.items[z]||[]).find(x=>x.id===t.dataset.id); if(it) await markItem(z,it,false); return; }
+  if (action === 'notfound'){ const z=t.dataset.zone, it=(state.items[z]||[]).find(x=>x.id===t.dataset.id); if(it) await markItem(z,it,true); return; }
+  if (action === 'undo'){ const z=t.dataset.zone, it=(state.items[z]||[]).find(x=>x.id===t.dataset.id); if(it) await undoItem(z,it); return; }
+  if (action === 'markhere'){ const z=t.dataset.zone, it=(state.items[z]||[]).find(x=>x.id===t.dataset.id); if(it) await markHere(z,it); return; }
+  if (action === 'cancel-zone-entry'){ state.pendingZone = null; state.screen = state.currentZone ? 'picking' : 'lobby'; render(); return; }
+  if (action === 'box-dec'){ state.zoneBoxCount = Math.max(1, state.zoneBoxCount - 1); render(); return; }
+  if (action === 'box-inc'){ state.zoneBoxCount = state.zoneBoxCount + 1; render(); return; }
+  if (action === 'claim-full'){ state.currentZone = state.pendingZone; state.pendingZone = null; state.screen = 'picking'; render(); startPolling(); return; }
+  if (action === 'claim-partial'){
+    const zone = state.pendingZone;
+    const assignment = await claimBoxes(zone, state.pickerName, state.zoneBoxCount);
+    state.assignment[zone] = assignment;
+    state.currentZone = zone;
+    state.pendingZone = null;
+    state.screen = 'picking';
+    render();
+    startPolling();
+    return;
+  }
+  if (action === 'request-more-boxes'){ stopPolling(); state.pendingZone = t.dataset.zone; state.zoneBoxCount = 1; state.screen = 'zone-entry'; render(); return; }
+  if (action === 'release-assignment'){
+    const zone = t.dataset.zone, picker = t.dataset.picker;
+    if (!confirm(`Zuteilung von "${picker}" wirklich freigeben?`)) return;
+    const assignment = await releaseAssignmentFor(zone, picker);
+    state.assignment[zone] = assignment;
+    render();
+    return;
+  }
+  if (action === 'edit-title'){ state.modal = {type:'edit-title', zone: t.dataset.zone, itemId: t.dataset.id}; render(); return; }
+  if (action === 'open-damage'){ state.modal = {type:'damage', zone: t.dataset.zone, itemId: t.dataset.id}; render(); return; }
+  if (action === 'set-damage'){ await setDamage(t.dataset.zone, t.dataset.id, t.dataset.reason); render(); return; }
+  if (action === 'clear-damage'){ await setDamage(t.dataset.zone, t.dataset.id, null); render(); return; }
+  if (action === 'manage-damage-reasons'){ state.modal = {type:'manage-damage-reasons'}; render(); return; }
+  if (action === 'remove-damage-reason'){ await removeDamageReason(t.dataset.reason); return; }
+  if (action === 'noop'){ return; }
+  if (action === 'close-modal' || action === 'close-modal-bg'){ state.modal = null; render(); return; }
+});
+
+document.getElementById('app').addEventListener('submit', async (e) => {
+  const loginT = e.target.closest('[data-action="login-form"]');
+  if (loginT){
+    e.preventDefault();
+    const u = document.getElementById('login-username');
+    const p = document.getElementById('login-password');
+    await submitLogin(u ? u.value : '', p ? p.value : '');
+    return;
+  }
+  const jumpT = e.target.closest('[data-action="jump-form"]');
+  if (jumpT){ e.preventDefault(); const input = document.getElementById('jump-input'); if (input) jumpTo(state.currentZone, input.value); return; }
+  const addUserT = e.target.closest('[data-action="add-user-form"]');
+  if (addUserT){ e.preventDefault(); const input = document.getElementById('new-user-input'); if (input && input.value.trim()){ await addUserName(input.value); input.value=''; } return; }
+  const urlT = e.target.closest('[data-action="save-url-form"]');
+  if (urlT){ e.preventDefault(); const input = document.getElementById('source-url-input'); if (input) await saveSourceUrl(input.value); return; }
+  const addressUrlT = e.target.closest('[data-action="save-address-url-form"]');
+  if (addressUrlT){
+    e.preventDefault();
+    const input = document.getElementById('address-url-input');
+    if (input){
+      state.addressSourceUrl = input.value.trim() || null;
+      await storageSet('address-source-url', state.addressSourceUrl);
+      if (state.addressSourceUrl) await fetchAndStoreAddressData();
+      render();
+    }
+    return;
+  }
+  const titleT = e.target.closest('[data-action="save-title-form"]');
+  if (titleT){
+    e.preventDefault();
+    const input = document.getElementById('edit-title-input');
+    const {zone, itemId} = state.modal;
+    if (input) await setTitleOverride(zone, itemId, input.value);
+    state.modal = null;
+    render();
+    return;
+  }
+  const reasonT = e.target.closest('[data-action="add-damage-reason-form"]');
+  if (reasonT){ e.preventDefault(); const input = document.getElementById('new-damage-reason-input'); if (input && input.value.trim()){ await addDamageReason(input.value); input.value=''; } return; }
+});
+
+init();
+</script>
+</body>
+</html>
